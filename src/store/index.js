@@ -1,27 +1,33 @@
-import { store } from 'quasar/wrappers'
-import { createStore } from 'vuex'
+import { createStore } from "vuex";
 
-// import example from './module-example'
+import _ from "lodash";
+import { store } from "quasar/wrappers";
 
-/*
- * If not building with SSR mode, you can
- * directly export the Store instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Store instance.
- */
+// import getters from "./getters";
+import { setStore } from "./instance";
 
-export default store(function (/* { ssrContext } */) {
+const modulesFiles = import.meta.glob("./modules/*.js", { eager: true });
+async function loadModules() {
+  const modules = {};
+  const modulePaths = Object.keys(modulesFiles);
+  for (const modulePath of modulePaths) {
+    const mod = await modulesFiles[modulePath]();
+    const moduleName = modulePath.replace(
+      /^\.\/modules\/(.*)\.js(?:\?.+)?$/,
+      "$1"
+    );
+    modules[moduleName] = mod.default;
+  }
+  return modules;
+}
+
+export default store(async function (/* { ssrContext } */) {
+  const modules = await loadModules();
   const Store = createStore({
-    modules: {
-      // example
-    },
-
-    // enable strict mode (adds overhead!)
-    // for dev mode and --debug builds only
-    strict: process.env.DEBUGGING
-  })
-
-  return Store
-})
+    modules,
+    // getters,
+    // strict: process.env.DEBUGGING,
+  });
+  setStore(Store);
+  return Store;
+});
