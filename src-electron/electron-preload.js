@@ -53,7 +53,18 @@ contextBridge.exposeInMainWorld("electron", {
   getProjectCount: async (path) => {
     console.log("path", path);
     try {
-      return await ipcRenderer.invoke("get-project-count", path);
+      // 이벤트 리스너 등록
+      const result = await new Promise((resolve) => {
+        const listener = (event, data) => {
+          if (data.path === path) {
+            ipcRenderer.removeListener("project-count-result", listener);
+            resolve(data);
+          }
+        };
+        ipcRenderer.on("project-count-result", listener);
+        ipcRenderer.send("get-project-count", path);
+      });
+      return result;
     } catch (error) {
       console.error("프로젝트 카운트 에러:", error);
       throw error;

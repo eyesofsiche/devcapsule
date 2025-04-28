@@ -1,5 +1,9 @@
 // app global css in SCSS form
 
+body {
+  font-size: 12px;
+}
+
 // 다크 모드 커스텀 스타일
 body.body--dark {
   background: #171717;

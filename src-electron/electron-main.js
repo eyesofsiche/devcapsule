@@ -86,8 +86,18 @@ ipcMain.handle("dialog:openDirectory", async () => {
   return result.filePaths[0];
 });
 
-ipcMain.handle("get-project-count", async (event, folderPath) => {
-  return await getProjectCount(event, folderPath);
+ipcMain.on("get-project-count", async (event, folderPath) => {
+  console.log("get-project-count", folderPath);
+  try {
+    const result = await getProjectCount(event, folderPath);
+    event.reply("project-count-result", { path: folderPath, ...result });
+  } catch (error) {
+    event.reply("project-count-result", {
+      path: folderPath,
+      success: false,
+      error: error.message,
+    });
+  }
 });
 
 app.on("window-all-closed", () => {
