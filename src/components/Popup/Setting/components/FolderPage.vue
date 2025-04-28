@@ -1,34 +1,48 @@
 <template lang="pug">
-.text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
+.folder-page
+  .text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
 
-q-list.q-mt-md(separator bordered)
-  q-item(
-    v-for="(path, index) in selectedPaths"
-    :key="index"
-    :loading="true"
-  )
-    q-item-section(style="min-height: 42px;")
-      q-item-label {{ path }}
-      q-item-label(caption)
-        template(v-if="projectCounts[path]?.loading")
-          span 프로젝트 찾는 중...
-        template(v-else)
-          | {{ projectCounts[path]?.count || 0 }} 프로젝트 감지됨
-      q-inner-loading(:showing="projectCounts[path]?.loading")
-        q-spinner-facebook(size="20px" color="primary")
-    q-item-section(v-if="!projectCounts[path]?.loading" side)
-      q-btn(
-        flat
-        round
-        color="negative"
-        icon="delete"
-        @click="removePath(index)"
-      )
+  q-list.q-mt-md(separator bordered)
+    q-item(
+      v-for="(path, idx) in selectedPaths"
+      :key="idx"
+      :loading="projectCounts[path]?.loading"
+    )
+      q-item-section(style="min-height: 42px;")
+        q-item-label {{ path }}
+        q-item-label(caption)
+          template(v-if="projectCounts[path]?.loading")
+            span 프로젝트 찾는 중...
+          template(v-else)
+            | {{ projectCounts[path]?.count || 0 }} 프로젝트 감지됨
+        q-inner-loading(:showing="projectCounts[path]?.loading")
+          q-spinner-facebook(size="20px" color="primary")
+      q-item-section(v-if="!projectCounts[path]?.loading" side)
+        q-btn(
+          flat
+          round
+          color="negative"
+          icon="delete"
+          @click="removePath(idx)"
+        )
+
+    q-item(v-if="!selectedPaths.length")
+      q-item-section.text-grey.text-center
+        | 선택된 폴더가 없습니다.
   
-  //- 경로가 없을 때 표시할 메시지
-  q-item(v-if="!selectedPaths.length")
-    q-item-section(class="text-grey text-center")
-      | 선택된 폴더가 없습니다.
+  Teleport(v-if="showActions" to="#left-actions")
+    q-btn(
+      label="추가"
+      icon="mdi-folder-plus-outline"
+      color="green"
+      dense
+      unelevated
+      @click="addFolder"
+    )
+  Teleport(v-if="showActions" to="#right-actions")
+    .row.q-gutter-x-sm
+      q-btn(label="닫기" color="primary" dense unelevated)
+      q-btn(label="닫기" color="primary" dense unelevated)
 </template>
 
 <script>
@@ -38,7 +52,13 @@ export default {
     return {
       selectedPaths: [],
       projectCounts: {},
+      showActions: false,
     };
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.showActions = true;
+    });
   },
   methods: {
     async addFolder() {
