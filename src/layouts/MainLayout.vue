@@ -1,42 +1,35 @@
-<template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
-      <router-view />
-    </q-page-container>
-  </q-layout>
+<template lang="pug">
+q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
+  .sidebar
+    q-list.full-width
+      q-item(v-ripple)
+        q-item-section
+          q-btn.full-width.hover(
+            icon="grid_view"
+            align="left"
+            color="201F27"
+            flat
+            dense
+          ) 미등록 프로젝트
+            q-badge(label="!" color="red" floating transparent rounded)
+      q-separator
+      q-scroll-area.scroll
+      q-separator
+      q-item(v-ripple)
+        q-item-section
+          q-btn.full-width(
+            icon="settings"
+            align="left"
+            color="201F27"
+            flat
+            dense
+          ) 설정
+  q-page-container
+    router-view
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 
 import EssentialLink from "components/EssentialLink.vue";
 
@@ -91,18 +84,35 @@ export default defineComponent({
   components: {
     EssentialLink,
   },
-
-  data() {
-    return {
-      linksList,
-      leftDrawerOpen: false,
-    };
-  },
-
-  methods: {
-    toggleLeftDrawer() {
-      this.leftDrawerOpen = !this.leftDrawerOpen;
-    },
-  },
 });
 </script>
+
+<style lang="scss" scoped>
+.sidebar {
+  display: flex;
+  width: 300px;
+  height: 100vh;
+  border-right: 1px solid #2e2e2f;
+  background-color: #2d2d2d;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+
+  .q-item {
+    padding: 8px;
+  }
+
+  .q-btn.hover {
+    // background-color: #201f27;
+  }
+}
+
+.q-page-container {
+  margin-left: 300px;
+}
+
+.scroll {
+  height: calc(100vh - 102px);
+}
+</style>

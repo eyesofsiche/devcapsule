@@ -1,1 +1,29 @@
 // app global css in SCSS form
+
+// 다크 모드 커스텀 스타일
+body.body--dark {
+  background: #171717;
+
+  .q-card {
+    background: #222223;
+  }
+
+  // .sidebar {
+  //   background: #222223;
+  //   border-right: 1px solid #2d2d2d;
+  // }
+
+  .q-header {
+    background: #222223;
+  }
+}
+
+.q-btn {
+  padding: 5px 8px;
+  .q-btn__content {
+    font-size: 12px;
+    .q-icon {
+      margin-right: 5px;
+    }
+  }
+}

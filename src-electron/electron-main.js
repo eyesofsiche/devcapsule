@@ -1,6 +1,8 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import os from "os";
 import path from "path";
+
+import { getProjectCount } from "./middleware";
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -58,6 +60,35 @@ async function createWindow() {
 }
 
 app.whenReady().then(createWindow);
+
+// 창 컨트롤 IPC 핸들러
+ipcMain.on("window:minimize", () => {
+  mainWindow.minimize();
+});
+
+ipcMain.on("window:maximize", () => {
+  if (mainWindow.isMaximized()) {
+    mainWindow.unmaximize();
+  } else {
+    mainWindow.maximize();
+  }
+});
+
+ipcMain.on("window:close", () => {
+  mainWindow.close();
+});
+
+// IPC 핸들러 등록
+ipcMain.handle("dialog:openDirectory", async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ["openDirectory"],
+  });
+  return result.filePaths[0];
+});
+
+ipcMain.handle("get-project-count", async (event, folderPath) => {
+  return await getProjectCount(event, folderPath);
+});
 
 app.on("window-all-closed", () => {
   if (platform !== "darwin") {
