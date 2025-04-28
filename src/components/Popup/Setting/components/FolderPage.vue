@@ -7,7 +7,7 @@ q-list.q-mt-md(separator bordered)
     :key="index"
     :loading="true"
   )
-    q-item-section
+    q-item-section(style="min-height: 42px;")
       q-item-label {{ path }}
       q-item-label(caption)
         template(v-if="projectCounts[path]?.loading")
@@ -28,7 +28,7 @@ q-list.q-mt-md(separator bordered)
   //- 경로가 없을 때 표시할 메시지
   q-item(v-if="!selectedPaths.length")
     q-item-section(class="text-grey text-center")
-      | 감시할 폴더를 추가해주세요
+      | 선택된 폴더가 없습니다.
 </template>
 
 <script>
