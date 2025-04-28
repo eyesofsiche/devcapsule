@@ -29,8 +29,8 @@ q-dialog(
         )
 
     q-card-actions(align="between")
-      .left(id="left-actions")
-      .right(id="right-actions")
+      #left-actions
+      #right-actions
 </template>
 
 <script>
