@@ -27,3 +27,43 @@
  *   }
  * }
  */
+
+import { contextBridge, ipcRenderer } from "electron";
+
+// Expose protected methods that allow the renderer process to use
+// the ipcRenderer without exposing the entire object
+contextBridge.exposeInMainWorld("electron", {
+  invoke: (channel, data) => {
+    // whitelist channels
+    const validChannels = ["get-db", "set-db"];
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, data);
+    }
+  },
+
+  selectFolder: async () => {
+    try {
+      return await ipcRenderer.invoke("dialog:openDirectory");
+    } catch (error) {
+      console.error("폴더 선택 에러:", error);
+      throw error;
+    }
+  },
+
+  getProjectCount: async (path) => {
+    console.log("path", path);
+    try {
+      return await ipcRenderer.invoke("get-project-count", path);
+    } catch (error) {
+      console.error("프로젝트 카운트 에러:", error);
+      throw error;
+    }
+  },
+
+  // 창 컨트롤 기능 추가
+  windowControl: {
+    minimize: () => ipcRenderer.send("window:minimize"),
+    maximize: () => ipcRenderer.send("window:maximize"),
+    close: () => ipcRenderer.send("window:close"),
+  },
+});
