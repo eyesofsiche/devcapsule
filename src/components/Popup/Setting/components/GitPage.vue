@@ -1,8 +1,8 @@
 <template lang="pug">
-.folder-page
-  .text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
+.normal-page
+  //- .text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
 
-  q-list.q-mt-md(separator bordered)
+  //- q-list.q-mt-md(separator bordered)
     q-item(
       v-for="(path, idx) in selectedPaths"
       :key="idx"
@@ -30,15 +30,6 @@
       q-item-section.text-grey.text-center(style="min-height: 42px;")
         | 선택된 폴더가 없습니다.
   
-  Teleport(v-if="showActions" to="#left-actions")
-    q-btn(
-      label="추가"
-      icon="mdi-folder-plus-outline"
-      color="green"
-      dense
-      unelevated
-      @click="addFolder"
-    )
   Teleport(v-if="showActions" to="#right-actions")
     .row.q-gutter-x-sm
       q-btn(
@@ -53,7 +44,7 @@
       q-btn(
         v-if="isEdit"
         label="저장"
-        color="primary"
+        color="positive"
         dense
         unelevated
         :disable="loading"
@@ -72,7 +63,7 @@
 
 <script>
 export default {
-  name: "FolderPage",
+  name: "GitPage",
   computed: {
     isEdit() {
       if (this.originPaths.length !== this.selectedPaths.length) {

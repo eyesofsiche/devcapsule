@@ -16,18 +16,17 @@ q-dialog(
       dark
     )
       q-tab(name="normal" icon="mdi-cog-outline" label="일반")
-      q-tab(name="git" icon="mdi-git" label="저장소")
       q-tab(name="folder" icon="mdi-folder-sync-outline" label="감시폴더")
+      q-tab(name="git" icon="mdi-git" label="저장소")
     q-separator
 
     q-tab-panels(v-model="tab" animated style="height: 300px")
       q-tab-panel(name="normal")
-        .text-center 일반 설정
+        normal-page(@close="close")
       q-tab-panel(name="folder")
-        folder-page(
-          ref="folderPage"
-          @close="close"
-        )
+        folder-page(@close="close")
+      q-tab-panel(name="git")
+        git-page(@close="close")
 
     q-card-actions(align="between")
       #left-actions
@@ -36,10 +35,14 @@ q-dialog(
 
 <script>
 import FolderPage from "./components/FolderPage.vue";
+import GitPage from "./components/GitPage.vue";
+import NormalPage from "./components/NormalPage.vue";
 
 export default {
   name: "SettingPage",
   components: {
+    NormalPage,
+    GitPage,
     FolderPage,
   },
   props: {
