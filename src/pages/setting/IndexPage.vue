@@ -63,6 +63,17 @@
 
 <script>
 export default {
+  async mounted() {
+    // try {
+    //   // 저장된 경로들 불러오기
+    //   const savedPaths = await window.electron.invoke("get-db", "watchPaths");
+    //   if (savedPaths) {
+    //     this.selectedPaths = savedPaths;
+    //   }
+    // } catch (e) {
+    //   console.error("저장된 경로 불러오기 오류:", e);
+    // }
+  },
   data() {
     return {
       selectedPaths: [],
@@ -150,18 +161,6 @@ export default {
         });
       }
     },
-  },
-
-  async mounted() {
-    // try {
-    //   // 저장된 경로들 불러오기
-    //   const savedPaths = await window.electron.invoke("get-db", "watchPaths");
-    //   if (savedPaths) {
-    //     this.selectedPaths = savedPaths;
-    //   }
-    // } catch (e) {
-    //   console.error("저장된 경로 불러오기 오류:", e);
-    // }
   },
 };
 </script>

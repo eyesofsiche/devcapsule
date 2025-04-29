@@ -88,6 +88,11 @@ export default {
       );
     },
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.showActions = true;
+    });
+  },
   data() {
     return {
       originPaths: [],
@@ -95,11 +100,6 @@ export default {
       projectCounts: {},
       showActions: false,
     };
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.showActions = true;
-    });
   },
   methods: {
     async addFolder() {

@@ -51,6 +51,11 @@ export default {
       );
     },
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.showActions = true;
+    });
+  },
   data() {
     return {
       originForm: this.$_.cloneDeep(defaultForm),
@@ -60,11 +65,6 @@ export default {
       projectCounts: {},
       showActions: false,
     };
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.showActions = true;
-    });
   },
   methods: {
     async addFolder() {
