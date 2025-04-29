@@ -26,7 +26,7 @@
           @click="removePath(idx)"
         )
 
-    q-item(v-if="!selectedPaths.length")
+    q-item(v-if="selectedPaths.length < 1")
       q-item-section.text-grey.text-center(style="min-height: 42px;")
         | 선택된 폴더가 없습니다.
   
@@ -46,7 +46,6 @@
         label="취소"
         color="negative"
         dense
-        unelevated
         :disable="loading"
         @click="clickCancel"
       )
@@ -55,25 +54,26 @@
         label="저장"
         color="primary"
         dense
-        unelevated
         :disable="loading"
         @click="clickSave"
       )
       q-btn(
-        v-else
+        v-if="!isEdit"
         label="닫기"
         color="grey"
         dense
-        unelevated
         :disable="loading"
         @click="$emit('close')"
       )
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "FolderPage",
   computed: {
+    ...mapGetters(["folders"]),
     isEdit() {
       if (this.originPaths.length !== this.selectedPaths.length) {
         return true;
@@ -86,6 +86,15 @@ export default {
       return this.selectedPaths.some(
         (path) => this.projectCounts[path]?.loading
       );
+    },
+  },
+  watch: {
+    folders: {
+      handler(val) {
+        this.init(val);
+      },
+      deep: true,
+      immediate: true,
     },
   },
   mounted() {
@@ -102,6 +111,24 @@ export default {
     };
   },
   methods: {
+    init(val) {
+      if (val.length === 0) {
+        this.originPaths = [];
+        this.selectedPaths = [];
+        this.projectCounts = {};
+        return;
+      }
+      const paths = val.map((item) => item.path);
+      this.originPaths = this.$_.cloneDeep(paths);
+      this.selectedPaths = this.$_.cloneDeep(paths);
+      this.projectCounts = paths.reduce((acc, path) => {
+        acc[path] = {
+          loading: false,
+          count: val.find((item) => item.path === path)?.count || 0,
+        };
+        return acc;
+      }, {});
+    },
     async addFolder() {
       try {
         const result = await window.electron.selectFolder();
@@ -129,13 +156,6 @@ export default {
       }
     },
 
-    removePath(index) {
-      const path = this.selectedPaths[index];
-      this.selectedPaths.splice(index, 1);
-      // 프로젝트 카운트 데이터도 삭제
-      delete this.projectCounts[path];
-    },
-
     async updateProjectCount(path) {
       // 로딩 상태 설정
       this.projectCounts[path] = { loading: true, count: 0 };
@@ -158,12 +178,26 @@ export default {
       }
     },
 
+    removePath(index) {
+      const path = this.selectedPaths[index];
+      this.selectedPaths.splice(index, 1);
+      delete this.projectCounts[path];
+    },
+
     clickCancel() {
-      this.selectedPaths = this.$_.cloneDeep(this.originPaths);
+      this.init(this.folders);
     },
 
     clickSave() {
-      console.log("clickSave");
+      const formattedData = this.selectedPaths.map((path) => ({
+        path,
+        count: this.projectCounts[path]?.count || 0,
+      }));
+
+      this.$store.dispatch("folders/setList", {
+        list: formattedData,
+      });
+      this.clickCancel();
     },
   },
 };

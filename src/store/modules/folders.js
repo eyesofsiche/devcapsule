@@ -14,7 +14,7 @@ const actions = {
   setList({ commit }, { list, options = { save: true } }) {
     commit("SET_LIST", list);
     if (options.save) {
-      window.electron.lowdb.set("projects", list);
+      window.electron.lowdb.set("folders", list);
     }
   },
 };
