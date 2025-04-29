@@ -159,7 +159,7 @@ export default {
     },
 
     clickCancel() {
-      this.selectedPaths = this.originPaths;
+      this.selectedPaths = this.$_.cloneDeep(this.originPaths);
     },
 
     clickSave() {
