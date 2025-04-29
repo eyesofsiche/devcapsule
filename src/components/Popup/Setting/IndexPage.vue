@@ -50,7 +50,7 @@ export default {
   },
   data() {
     return {
-      tab: "folder",
+      tab: "normal",
     };
   },
   methods: {

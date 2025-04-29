@@ -8,6 +8,8 @@ let db;
 // ✨ 초기 기본 데이터 (파일이 없거나 비었을 때)
 const defaultData = {
   settings: {
+    autoRun: false,
+    autoRefresh: false,
     theme: "dark",
     language: "ko",
   },
@@ -61,9 +63,4 @@ export async function updateDBSection(section, patch) {
   }
 
   await db.write();
-}
-
-// 📂 파일 직접 경로 가져오기 (필요시)
-export function getDBFilePath() {
-  return dbFile;
 }
