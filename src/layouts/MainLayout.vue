@@ -11,7 +11,14 @@ q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
             flat
             dense
           ) 미등록 프로젝트
-            q-badge(label="!" color="red" floating transparent rounded)
+            template(v-if="folders.length < 1")
+              q-tooltip.bg-red(
+                anchor="center middle"
+                self="center middle"
+                transition-show="scale"
+                transition-hide="scale"
+              ) 감시폴더를 추가해주세요.
+              q-badge(label="!" color="red" floating transparent rounded)
       q-separator
       q-scroll-area.scroll
       q-separator
@@ -32,12 +39,17 @@ q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 import PopupSetting from "@/components/Popup/Setting/IndexPage.vue";
 
 export default {
   name: "MainLayout",
   components: {
     PopupSetting,
+  },
+  computed: {
+    ...mapGetters(["folders", "projects"]),
   },
   data() {
     return {
