@@ -27,7 +27,7 @@
         )
 
     q-item(v-if="!selectedPaths.length")
-      q-item-section.text-grey.text-center
+      q-item-section.text-grey.text-center(style="min-height: 42px;")
         | 선택된 폴더가 없습니다.
   
   Teleport(v-if="showActions" to="#left-actions")
@@ -41,15 +41,56 @@
     )
   Teleport(v-if="showActions" to="#right-actions")
     .row.q-gutter-x-sm
-      q-btn(label="닫기" color="primary" dense unelevated)
-      q-btn(label="닫기" color="primary" dense unelevated)
+      q-btn(
+        v-if="isEdit"
+        label="취소"
+        color="negative"
+        dense
+        unelevated
+        :disable="loading"
+        @click="clickCancel"
+      )
+      q-btn(
+        v-if="isEdit"
+        label="저장"
+        color="positive"
+        dense
+        unelevated
+        :disable="loading"
+        @click="clickSave"
+      )
+      q-btn(
+        v-else
+        label="닫기"
+        color="grey"
+        dense
+        unelevated
+        :disable="loading"
+        @click="$emit('close')"
+      )
 </template>
 
 <script>
 export default {
   name: "FolderPage",
+  computed: {
+    isEdit() {
+      if (this.originPaths.length !== this.selectedPaths.length) {
+        return true;
+      }
+      return this.originPaths.some(
+        (path) => !this.selectedPaths.includes(path)
+      );
+    },
+    loading() {
+      return this.selectedPaths.some(
+        (path) => this.projectCounts[path]?.loading
+      );
+    },
+  },
   data() {
     return {
+      originPaths: [],
       selectedPaths: [],
       projectCounts: {},
       showActions: false,
@@ -115,6 +156,14 @@ export default {
           count: 0,
         };
       }
+    },
+
+    clickCancel() {
+      this.selectedPaths = this.originPaths;
+    },
+
+    clickSave() {
+      console.log("clickSave");
     },
   },
 };

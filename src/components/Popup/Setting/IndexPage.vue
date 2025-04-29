@@ -26,6 +26,7 @@ q-dialog(
       q-tab-panel(name="folder")
         folder-page(
           ref="folderPage"
+          @close="close"
         )
 
     q-card-actions(align="between")
@@ -44,36 +45,13 @@ export default {
   props: {
     modelValue: Boolean,
   },
-  // directives: {
-  //   // v-append-to-actions 를 쓴 엘리먼트를
-  //   // q-card-actions 의 왼쪽(.left) 컨테이너로 옮겨 줌
-  //   appendToActions: {
-  //     mounted(el) {
-  //       // q-dialog 안에 있는 q-card-actions.left 찾기
-  //       // (필요하다면 ID, data-attr 등으로 더 특정해 주세요)
-  //       const dialog = document.querySelector(".q-dialog__inner");
-  //       console.log(dialog);
-  //       if (!dialog) return;
-  //       const actions = dialog.querySelector(".q-card-actions .left");
-  //       if (actions) {
-  //         actions.appendChild(el);
-  //       }
-  //     },
-  //     unmounted(el) {
-  //       el.remove();
-  //     },
-  //   },
-  // },
   data() {
     return {
       tab: "folder",
     };
   },
   methods: {
-    addFolder() {
-      this.$refs.folderPage.addFolder();
-    },
-    onClose() {
+    close() {
       this.$emit("update:modelValue", false);
     },
   },
