@@ -4,12 +4,13 @@ q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
     q-list.full-width
       q-item(v-ripple)
         q-item-section
-          q-btn.full-width.hover(
-            icon="grid_view"
+          q-btn.full-width(
+            :icon="listView === 'projects' ? 'grid_view' : 'arrow_back'"
             align="left"
-            color="201F27"
-            flat
+            :color="listView === 'projects' ? '201F27' : 'primary'"
+            :flat="listView === 'projects'"
             dense
+            @click="clickListToggle"
           ) 미등록 프로젝트
             template(v-if="folders.length < 1")
               q-tooltip.bg-red(
@@ -18,9 +19,30 @@ q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
                 transition-show="scale"
                 transition-hide="scale"
               ) 감시폴더를 추가해주세요.
-              q-badge(label="!" color="red" floating transparent rounded)
+              q-badge.q-ml-sm(label="!" color="red" rounded)
+            template(v-else-if="unregisteredProjectCount > 0")
+              q-badge.q-ml-sm(:label="unregisteredProjectCount" color="red" rounded)
       q-separator
       q-scroll-area.scroll
+        template(v-if="listView === 'projects'")
+          template(v-if="projects.length > 0")
+          template(v-else)
+            .text-caption.no-project
+              q-icon(name="info" size="25px" color="white")
+              | 등록된 프로젝트가 없습니다.
+        template(v-else)
+          .text-caption.no-project
+            q-icon(name="info" size="25px" color="white")
+            | 미등록 프로젝트
+        //- q-item(v-ripple)
+          q-item-section
+            q-btn.full-width(
+              icon="grid_view"
+              align="left"
+              color="201F27"
+              flat
+              dense
+            ) project
       q-separator
       q-item(v-ripple)
         q-item-section
@@ -50,11 +72,26 @@ export default {
   },
   computed: {
     ...mapGetters(["folders", "projects"]),
+    totalProjectCount() {
+      return this.folders
+        .map((item) => item.count)
+        .reduce((acc, curr) => acc + curr, 0);
+    },
+    unregisteredProjectCount() {
+      return this.totalProjectCount - this.projects.length;
+    },
   },
   data() {
     return {
+      listView: "projects",
       settingVisible: false,
     };
+  },
+  methods: {
+    clickListToggle() {
+      this.listView =
+        this.listView === "projects" ? "unregistered" : "projects";
+    },
   },
 };
 </script>
@@ -75,8 +112,8 @@ export default {
     padding: 8px;
   }
 
-  .q-btn.hover {
-    // background-color: #201f27;
+  .q-btn.active {
+    background-color: #201f27;
   }
 }
 
@@ -86,5 +123,17 @@ export default {
 
 .scroll {
   height: calc(100vh - 102px);
+}
+
+.no-project {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  i {
+    display: block;
+    margin: 0 auto 10px;
+  }
 }
 </style>
