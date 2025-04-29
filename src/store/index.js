@@ -3,7 +3,7 @@ import { createStore } from "vuex";
 import _ from "lodash";
 import { store } from "quasar/wrappers";
 
-// import getters from "./getters";
+import getters from "./getters";
 import { setStore } from "./instance";
 
 const modulesFiles = import.meta.glob("./modules/*.js", { eager: true });
@@ -25,7 +25,7 @@ export default store(async function (/* { ssrContext } */) {
   const modules = await loadModules();
   const Store = createStore({
     modules,
-    // getters,
+    getters,
     // strict: process.env.DEBUGGING,
   });
   setStore(Store);
