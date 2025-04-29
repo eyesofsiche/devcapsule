@@ -49,10 +49,17 @@ export async function updateDBSection(section, patch) {
   await db.read();
   if (!db.data) db.data = defaultData;
 
-  db.data[section] = {
-    ...(db.data[section] || {}),
-    ...patch,
-  };
+  if (Array.isArray(db.data[section])) {
+    // 원래 배열이었으면 통째로 교체
+    db.data[section] = patch;
+  } else {
+    // 객체면 머지
+    db.data[section] = {
+      ...(db.data[section] || {}),
+      ...patch,
+    };
+  }
+
   await db.write();
 }
 
