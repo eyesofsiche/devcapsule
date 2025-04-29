@@ -61,6 +61,24 @@ module.exports = {
 
     // allow debugger during development only
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+    "vue/order-in-components": [
+      "warn",
+      {
+        order: [
+          "name",
+          "mixins",
+          "components",
+          "directives",
+          "props",
+          "computed",
+          "watch",
+          "emits",
+          "LIFECYCLE_HOOKS", // created, mounted, beforeDestroy 이런 거
+          "data",
+          "methods",
+        ],
+      },
+    ],
     "import-helpers/order-imports": [
       "warn",
       {
