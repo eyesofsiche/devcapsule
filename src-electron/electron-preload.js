@@ -61,12 +61,12 @@ contextBridge.exposeInMainWorld("electron", {
       const result = await new Promise((resolve) => {
         const listener = (event, data) => {
           if (data.path === path) {
-            ipcRenderer.removeListener("project-count-result", listener);
+            ipcRenderer.removeListener("cmd:project-count-result", listener);
             resolve(data);
           }
         };
-        ipcRenderer.on("project-count-result", listener);
-        ipcRenderer.send("get-project-count", path);
+        ipcRenderer.on("cmd:project-count-result", listener);
+        ipcRenderer.send("cmd:get-project-count", path);
       });
       return result;
     } catch (error) {

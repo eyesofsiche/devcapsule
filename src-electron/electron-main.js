@@ -120,13 +120,13 @@ ipcMain.handle("dialog:openDirectory", async () => {
   return result.filePaths[0];
 });
 
-ipcMain.on("get-project-count", async (event, folderPath) => {
-  console.log("get-project-count", folderPath);
+ipcMain.on("cmd:get-project-count", async (event, folderPath) => {
+  console.log("cmd:get-project-count", folderPath);
   try {
     const result = await getProjectCount(event, folderPath);
-    event.reply("project-count-result", { path: folderPath, ...result });
+    event.reply("cmd:project-count-result", { path: folderPath, ...result });
   } catch (error) {
-    event.reply("project-count-result", {
+    event.reply("cmd:project-count-result", {
       path: folderPath,
       success: false,
       error: error.message,
