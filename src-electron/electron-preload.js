@@ -33,13 +33,17 @@ import { contextBridge, ipcRenderer } from "electron";
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electron", {
-  invoke: (channel, data) => {
-    // whitelist channels
-    const validChannels = ["get-db", "set-db"];
-    if (validChannels.includes(channel)) {
-      return ipcRenderer.invoke(channel, data);
-    }
+  lowdb: {
+    get: () => ipcRenderer.invoke("lowdb:get"),
+    set: (key, value) => ipcRenderer.invoke("lowdb:set", { key, value }),
   },
+  // invoke: (channel, data) => {
+  //   // whitelist channels
+  //   const validChannels = ["lowdb:get", "lowdb:set"];
+  //   if (validChannels.includes(channel)) {
+  //     return ipcRenderer.invoke(channel, data);
+  //   }
+  // },
 
   selectFolder: async () => {
     try {
