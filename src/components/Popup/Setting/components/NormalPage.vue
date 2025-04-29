@@ -1,35 +1,8 @@
 <template lang="pug">
 .normal-page
-  //- .text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
+  q-form.q-gutter-md(ref="postForm")
+    q-checkbox(v-model="postForm.openExe" label="시작시 자동실행" dense)
 
-  //- q-list.q-mt-md(separator bordered)
-    q-item(
-      v-for="(path, idx) in selectedPaths"
-      :key="idx"
-      :loading="projectCounts[path]?.loading"
-    )
-      q-item-section(style="min-height: 42px;")
-        q-item-label {{ path }}
-        q-item-label(caption)
-          template(v-if="projectCounts[path]?.loading")
-            span 프로젝트 찾는 중...
-          template(v-else)
-            | {{ projectCounts[path]?.count || 0 }} 프로젝트 감지됨
-        q-inner-loading(:showing="projectCounts[path]?.loading")
-          q-spinner-facebook(size="20px" color="primary")
-      q-item-section(v-if="!projectCounts[path]?.loading" side)
-        q-btn(
-          flat
-          round
-          color="negative"
-          icon="delete"
-          @click="removePath(idx)"
-        )
-
-    q-item(v-if="!selectedPaths.length")
-      q-item-section.text-grey.text-center(style="min-height: 42px;")
-        | 선택된 폴더가 없습니다.
-  
   Teleport(v-if="showActions" to="#right-actions")
     .row.q-gutter-x-sm
       q-btn(
@@ -62,16 +35,15 @@
 </template>
 
 <script>
+const defaultForm = {
+  openExe: false,
+};
+
 export default {
   name: "NormalPage",
   computed: {
     isEdit() {
-      if (this.originPaths.length !== this.selectedPaths.length) {
-        return true;
-      }
-      return this.originPaths.some(
-        (path) => !this.selectedPaths.includes(path)
-      );
+      return !this.$_.isEqual(this.originForm, this.postForm);
     },
     loading() {
       return this.selectedPaths.some(
@@ -81,6 +53,8 @@ export default {
   },
   data() {
     return {
+      originForm: this.$_.cloneDeep(defaultForm),
+      postForm: this.$_.cloneDeep(defaultForm),
       originPaths: [],
       selectedPaths: [],
       projectCounts: {},
@@ -150,7 +124,7 @@ export default {
     },
 
     clickCancel() {
-      this.selectedPaths = this.originPaths;
+      this.postForm = this.$_.cloneDeep(this.originForm);
     },
 
     clickSave() {

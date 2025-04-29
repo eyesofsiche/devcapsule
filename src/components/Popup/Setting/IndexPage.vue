@@ -17,7 +17,7 @@ q-dialog(
     )
       q-tab(name="normal" icon="mdi-cog-outline" label="일반")
       q-tab(name="folder" icon="mdi-folder-sync-outline" label="감시폴더")
-      q-tab(name="git" icon="mdi-git" label="저장소")
+      //- q-tab(name="git" icon="mdi-git" label="저장소")
     q-separator
 
     q-tab-panels(v-model="tab" animated style="height: 300px")
