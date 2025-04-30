@@ -30,9 +30,12 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
+import { invokeWithReply } from "./middleware/ipcClient.js";
+
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electron", {
+  invokeWithReply,
   lowdb: {
     get: () => ipcRenderer.invoke("lowdb:get"),
     set: (key, value) => ipcRenderer.invoke("lowdb:set", { key, value }),
@@ -53,27 +56,6 @@ contextBridge.exposeInMainWorld("electron", {
       return await ipcRenderer.invoke("dialog:openDirectory");
     } catch (error) {
       console.error("폴더 선택 에러:", error);
-      throw error;
-    }
-  },
-
-  getProjectCount: async (path) => {
-    console.log("path", path);
-    try {
-      // 이벤트 리스너 등록
-      const result = await new Promise((resolve) => {
-        const listener = (event, data) => {
-          if (data.path === path) {
-            ipcRenderer.removeListener("cmd:project-count-result", listener);
-            resolve(data);
-          }
-        };
-        ipcRenderer.on("cmd:project-count-result", listener);
-        ipcRenderer.send("cmd:get-project-count", path);
-      });
-      return result;
-    } catch (error) {
-      console.error("프로젝트 카운트 에러:", error);
       throw error;
     }
   },

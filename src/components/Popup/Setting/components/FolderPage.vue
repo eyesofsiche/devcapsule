@@ -162,14 +162,16 @@ export default {
 
       try {
         // 비동기로 프로젝트 수 계산 요청
-        window.electron.getProjectCount(path).then((result) => {
-          // 로딩 완료 및 결과 설정
-          this.projectCounts[path] = {
-            loading: false,
-            count: result.success ? result.count : 0,
-            list: result.success ? result.list : [],
-          };
-        });
+        window.electron
+          .invokeWithReply("cmd:get-project-count", { path }, 5 * 60 * 1000)
+          .then((result) => {
+            // 로딩 완료 및 결과 설정
+            this.projectCounts[path] = {
+              loading: false,
+              count: result.success ? result.count : 0,
+              list: result.success ? result.list : [],
+            };
+          });
       } catch (e) {
         console.error(`프로젝트 수 계산 오류 (${path}):`, e);
         this.projectCounts[path] = {
