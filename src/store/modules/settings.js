@@ -24,16 +24,19 @@ const mutations = {
 
 const actions = {
   setSettings({ commit }, { data, options = { save: true } }) {
-    commit("SET_AUTO_RUN", data.autoRun);
-    commit("SET_AUTO_REFRESH", data.autoRefresh);
-    commit("SET_THEME", data.theme);
-    commit("SET_LANGUAGE", data.language);
     if (options.save) {
+      if (state.autoRefresh !== data.autoRefresh) {
+        window.electron.autoRefresh(data.autoRefresh);
+      }
       window.electron.lowdb.set(
         "settings",
         devalue.parse(devalue.stringify(data))
       );
     }
+    commit("SET_AUTO_RUN", data.autoRun);
+    commit("SET_AUTO_REFRESH", data.autoRefresh);
+    commit("SET_THEME", data.theme);
+    commit("SET_LANGUAGE", data.language);
   },
 };
 

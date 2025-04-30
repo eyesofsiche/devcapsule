@@ -1,5 +1,11 @@
 import { ipcMain, dialog } from "electron";
 
+import {
+  getProjectCount,
+  startAutoProjectCount,
+  stopAutoProjectCount,
+} from "../../middleware/index.js";
+
 export default function registerSettingsHandlers() {
   // 자동 새로고침 설정 변경
   ipcMain.on("cmd:change-auto-refresh", async (event, autoRefresh) => {

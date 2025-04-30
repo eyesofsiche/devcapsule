@@ -2,6 +2,8 @@ import { app } from "electron";
 import path from "path";
 import { Worker } from "worker_threads";
 
+import { readDB, updateDBSection } from "../db/lowdb";
+
 function getWorkerPath(name) {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, "workers", name);
@@ -44,3 +46,46 @@ export const getProjectCount = async (event, folderPath) => {
     }
   });
 };
+
+let interval = null;
+export async function startAutoProjectCount() {
+  if (interval) return; // 이미 돌고 있으면 무시
+
+  console.log("📦 Starting Auto Project Count...");
+
+  const runScan = async () => {
+    const db = await readDB();
+    const folders = db.folders || [];
+    const result = [];
+
+    for (const folder of folders) {
+      try {
+        const projectInfo = await getProjectCount(null, folder.path);
+        console.log(`Folder ${folder.path}: ${projectInfo} projects found.`);
+        result.push({
+          path: folder.path,
+          count: projectInfo.count,
+          list: projectInfo.list,
+        });
+      } catch (err) {
+        console.error("❌ Project count failed:", err);
+      }
+    }
+    updateDBSection("folders", result);
+    console.log("✅ Project count updated in DB.");
+  };
+
+  // 처음 한번 실행
+  await runScan();
+
+  // 5분마다 실행
+  interval = setInterval(runScan, 5 * 60 * 1000);
+}
+
+export function stopAutoProjectCount() {
+  if (interval) {
+    clearInterval(interval);
+    interval = null;
+    console.log("🛑 Stopped Auto Project Count.");
+  }
+}
