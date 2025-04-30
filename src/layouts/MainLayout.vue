@@ -2,7 +2,7 @@
 q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
   .sidebar
     q-list.full-width
-      q-item(v-ripple)
+      q-item
         q-item-section
           q-btn.full-width(
             :icon="listView === 'projects' ? 'grid_view' : 'arrow_back'"
@@ -22,6 +22,8 @@ q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
               q-badge.q-ml-sm(label="!" color="red" rounded)
             template(v-else-if="unregisteredProjectCount > 0")
               q-badge.q-ml-sm(:label="unregisteredProjectCount" color="red" rounded)
+        q-item-section(avatar)
+          q-btn(round dense color="brown-5" icon="refresh" @click="clickRefresh" :loading="loadingRefresh")
       q-separator
       q-scroll-area.scroll
         template(v-if="listView === 'projects'")
@@ -52,12 +54,12 @@ q-layout(view="lhr LpR lFf" :dark="$q.dark.isActive")
             color="201F27"
             flat
             dense
-            @click="settingVisible = true"
+            @click="visibleSetting = true"
           ) 설정
   q-page-container
     router-view
 
-  popup-setting(v-model="settingVisible" @hide="settingVisible = false")
+  popup-setting(v-model="visibleSetting" @hide="visibleSetting = false")
 </template>
 
 <script>
@@ -84,13 +86,37 @@ export default {
   data() {
     return {
       listView: "projects",
-      settingVisible: false,
+      visibleSetting: false,
+      loadingRefresh: false,
     };
   },
   methods: {
     clickListToggle() {
       this.listView =
         this.listView === "projects" ? "unregistered" : "projects";
+    },
+    clickRefresh() {
+      this.loadingRefresh = true;
+      window.electron
+        .invokeWithReply("cmd:force-refresh", {}, 5 * 60 * 1000)
+        .then((req) => {
+          const { success, error } = req;
+          if (!success) {
+            this.$q.notify({
+              type: "negative",
+              message: error,
+            });
+          }
+        })
+        .finally(() => {
+          this.loadingRefresh = false;
+        });
+      // setTimeout(() => {
+      //   this.loadingRefresh = false;
+      // }, 3000);
+      // this.$store.dispatch("refreshProject").then(() => {
+      //   this.loadingRefresh = false;
+      // });
     },
   },
 };
@@ -135,5 +161,15 @@ export default {
     display: block;
     margin: 0 auto 10px;
   }
+}
+
+.q-item {
+  gap: 8px;
+}
+.q-item__section--main ~ .q-item__section--side {
+  padding-left: 0;
+}
+.q-item__section--avatar {
+  min-width: auto;
 }
 </style>
