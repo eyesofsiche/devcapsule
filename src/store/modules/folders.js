@@ -1,4 +1,4 @@
-import _ from "lodash";
+import * as devalue from "devalue";
 
 const state = {
   list: [],
@@ -14,7 +14,10 @@ const actions = {
   setList({ commit }, { list, options = { save: true } }) {
     commit("SET_LIST", list);
     if (options.save) {
-      window.electron.lowdb.set("folders", list);
+      window.electron.lowdb.set(
+        "folders",
+        devalue.parse(devalue.stringify(list))
+      );
     }
   },
 };
