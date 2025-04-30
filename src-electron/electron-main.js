@@ -1,15 +1,10 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import os from "os";
 import path from "path";
 
-import {
-  initDB,
-  readDB,
-  writeDB,
-  updateDBSection,
-  getDBFilePath,
-} from "./db/lowdb.js";
-import { getProjectCount } from "./middleware";
+import { initDB, readDB } from "./db/lowdb.js";
+import { registerAllIpcHandlers } from "./ipcMain/index.js";
+import { startAutoProjectCount } from "./middleware";
 
 if (process.env.NODE_ENV === "development") {
   app.name = "DevCapsule-dev";
@@ -24,7 +19,6 @@ const platform = process.platform || os.platform();
 let mainWindow;
 
 async function createWindow() {
-  await initDB();
   /**
    * Initial window options
    */
@@ -74,25 +68,16 @@ async function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+  await initDB();
+  await createWindow();
 
-ipcMain.handle("lowdb:get", async () => {
-  try {
-    return await readDB();
-  } catch (err) {
-    console.error("❌ Failed to read lowdb:", err);
-    return null; // 또는 빈 객체 {}, 오류 신호 반환
+  const db = await readDB();
+  if (db.settings?.autoRefresh) {
+    startAutoProjectCount();
   }
-});
 
-ipcMain.handle("lowdb:set", async (event, data) => {
-  try {
-    await updateDBSection(data.key, data.value);
-    return true;
-  } catch (err) {
-    console.error("❌ Failed to update lowdb:", err);
-    return false;
-  }
+  await registerAllIpcHandlers();
 });
 
 // 창 컨트롤 IPC 핸들러
@@ -107,31 +92,8 @@ ipcMain.on("window:maximize", () => {
     mainWindow.maximize();
   }
 });
-
 ipcMain.on("window:close", () => {
   mainWindow.close();
-});
-
-// IPC 핸들러 등록
-ipcMain.handle("dialog:openDirectory", async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ["openDirectory"],
-  });
-  return result.filePaths[0];
-});
-
-ipcMain.on("cmd:get-project-count", async (event, folderPath) => {
-  console.log("cmd:get-project-count", folderPath);
-  try {
-    const result = await getProjectCount(event, folderPath);
-    event.reply("cmd:project-count-result", { path: folderPath, ...result });
-  } catch (error) {
-    event.reply("cmd:project-count-result", {
-      path: folderPath,
-      success: false,
-      error: error.message,
-    });
-  }
 });
 
 app.on("window-all-closed", () => {
