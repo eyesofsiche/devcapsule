@@ -167,6 +167,7 @@ export default {
           this.projectCounts[path] = {
             loading: false,
             count: result.success ? result.count : 0,
+            list: result.success ? result.list : [],
           };
         });
       } catch (e) {
@@ -174,6 +175,7 @@ export default {
         this.projectCounts[path] = {
           loading: false,
           count: 0,
+          list: [],
         };
       }
     },
@@ -192,6 +194,7 @@ export default {
       const formattedData = this.selectedPaths.map((path) => ({
         path,
         count: this.projectCounts[path]?.count || 0,
+        list: this.projectCounts[path]?.list || [],
       }));
 
       this.$store.dispatch("folders/setList", {
