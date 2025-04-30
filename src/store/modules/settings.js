@@ -1,3 +1,5 @@
+import * as devalue from "devalue";
+
 const state = {
   autoRun: false,
   autoRefresh: false,
@@ -27,12 +29,10 @@ const actions = {
     commit("SET_THEME", data.theme);
     commit("SET_LANGUAGE", data.language);
     if (options.save) {
-      window.electron.lowdb.set("settings", {
-        autoRun: data.autoRun,
-        autoRefresh: data.autoRefresh,
-        theme: data.theme,
-        language: data.language,
-      });
+      window.electron.lowdb.set(
+        "settings",
+        devalue.parse(devalue.stringify(data))
+      );
     }
   },
 };
