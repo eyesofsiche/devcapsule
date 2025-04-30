@@ -2,6 +2,7 @@ import { ipcMain, dialog } from "electron";
 
 import {
   getProjectCount,
+  runFullScanFolder,
   startAutoProjectCount,
   stopAutoProjectCount,
 } from "../../middleware/index.js";
@@ -29,14 +30,28 @@ export default function registerSettingsHandlers() {
   });
 
   // 프로젝트 카운트
-  ipcMain.on("cmd:get-project-count", async (event, folderPath) => {
-    console.log("cmd:get-project-count", folderPath);
+  ipcMain.on("cmd:get-project-count", async (event, { replyChannel, path }) => {
+    console.log("cmd:get-project-count", path);
     try {
-      const result = await getProjectCount(event, folderPath);
-      event.reply("cmd:project-count-result", { path: folderPath, ...result });
+      const result = await getProjectCount(event, path);
+      event.reply(replyChannel, { path, ...result });
     } catch (error) {
-      event.reply("cmd:project-count-result", {
-        path: folderPath,
+      event.reply(replyChannel, {
+        path,
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+  ipcMain.on("cmd:force-refresh", async (event, { replyChannel }) => {
+    console.log("cmd:force-refresh");
+    try {
+      const result = await runFullScanFolder();
+      console.log("result", result);
+      event.reply(replyChannel, result);
+    } catch (error) {
+      event.reply(replyChannel, {
         success: false,
         error: error.message,
       });
