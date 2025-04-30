@@ -44,6 +44,9 @@ contextBridge.exposeInMainWorld("electron", {
   //     return ipcRenderer.invoke(channel, data);
   //   }
   // },
+  autoRefresh: (autoRefresh) => {
+    ipcRenderer.send("cmd:change-auto-refresh", autoRefresh);
+  },
 
   selectFolder: async () => {
     try {

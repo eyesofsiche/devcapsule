@@ -15,7 +15,6 @@ parentPort.on("message", async (folderPath) => {
       ...new Set(envFiles.map((file) => path.dirname(file))),
     ];
 
-    console.log(projectDirs);
     parentPort.postMessage({
       success: true,
       count: projectDirs.length,
