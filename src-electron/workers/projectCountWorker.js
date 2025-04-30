@@ -16,8 +16,12 @@ parentPort.on("message", async (folderPath) => {
     ];
 
     console.log(projectDirs);
-    parentPort.postMessage({ success: true, count: projectDirs.length });
+    parentPort.postMessage({
+      success: true,
+      count: projectDirs.length,
+      list: projectDirs,
+    });
   } catch (error) {
-    parentPort.postMessage({ success: false, error: error.message });
+    parentPort.postMessage({ success: false, error: error.message, list: [] });
   }
 });
