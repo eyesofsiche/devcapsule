@@ -26,8 +26,9 @@ body.body--dark {
   padding: 5px 8px;
   .q-btn__content {
     font-size: 12px;
+    gap: 5px;
     .q-icon {
-      margin-right: 5px;
+      // margin-right: 5px;
     }
   }
 }
