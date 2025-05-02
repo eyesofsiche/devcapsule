@@ -7,8 +7,7 @@ export default function registerDBHandlers() {
     try {
       return await readDB();
     } catch (err) {
-      console.error("❌ Failed to read lowdb:", err);
-      return null; // 또는 빈 객체 {}, 오류 신호 반환
+      return null;
     }
   });
 
@@ -17,7 +16,6 @@ export default function registerDBHandlers() {
       await updateDBSection(data.key, data.value);
       return true;
     } catch (err) {
-      console.error("❌ Failed to update lowdb:", err);
       return false;
     }
   });

@@ -98,7 +98,7 @@ export default {
     clickRefresh() {
       this.loadingRefresh = true;
       window.electron
-        .invokeWithReply("cmd:force-refresh", {}, 5 * 60 * 1000)
+        .invokeWithReply("cmd:manual-refresh")
         .then((req) => {
           const { success, error } = req;
           if (!success) {
@@ -111,12 +111,6 @@ export default {
         .finally(() => {
           this.loadingRefresh = false;
         });
-      // setTimeout(() => {
-      //   this.loadingRefresh = false;
-      // }, 3000);
-      // this.$store.dispatch("refreshProject").then(() => {
-      //   this.loadingRefresh = false;
-      // });
     },
   },
 };

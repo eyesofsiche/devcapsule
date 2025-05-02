@@ -4,7 +4,7 @@ import path from "path";
 
 import { initDB, readDB } from "./db/lowdb.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
-import { startAutoProjectCount } from "./middleware";
+import { scanner } from "./middleware/projectScan.js";
 
 if (process.env.NODE_ENV === "development") {
   app.name = "DevCapsule-dev";
@@ -71,13 +71,12 @@ async function createWindow() {
 app.whenReady().then(async () => {
   await initDB();
   await createWindow();
+  await registerAllIpcHandlers();
 
   const db = await readDB();
   if (db.settings?.autoRefresh) {
-    startAutoProjectCount();
+    scanner.startAuto();
   }
-
-  await registerAllIpcHandlers();
 });
 
 // 창 컨트롤 IPC 핸들러

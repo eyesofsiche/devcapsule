@@ -40,15 +40,8 @@ contextBridge.exposeInMainWorld("electron", {
     get: () => ipcRenderer.invoke("lowdb:get"),
     set: (key, value) => ipcRenderer.invoke("lowdb:set", { key, value }),
   },
-  // invoke: (channel, data) => {
-  //   // whitelist channels
-  //   const validChannels = ["lowdb:get", "lowdb:set"];
-  //   if (validChannels.includes(channel)) {
-  //     return ipcRenderer.invoke(channel, data);
-  //   }
-  // },
-  autoRefresh: (autoRefresh) => {
-    ipcRenderer.send("cmd:change-auto-refresh", autoRefresh);
+  autoRefresh: (flag, type) => {
+    ipcRenderer.send("cmd:change-auto-refresh", flag);
   },
 
   selectFolder: async () => {
