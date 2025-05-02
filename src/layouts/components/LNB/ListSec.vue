@@ -1,30 +1,23 @@
 <template lang="pug">
-q-scroll-area.scroll
+q-scroll-area.scroll#scroll-lbn-area
   template(v-if="listView === 'projects'")
     template(v-if="projects.length > 0")
     template(v-else)
       .text-caption.no-project
         q-icon(name="info" size="25px" color="white")
         | 등록된 프로젝트가 없습니다.
-  template(v-else)
-    .text-caption.no-project
-      q-icon(name="info" size="25px" color="white")
-      | 프로젝트가 존재하지 않습니다.
-  //- q-item(v-ripple)
-    q-item-section
-      q-btn.full-width(
-        icon="grid_view"
-        align="left"
-        color="201F27"
-        flat
-        dense
-      ) project
+  unreg-list(v-else)
 </template>
 
 <script>
 import { mapGetters } from "vuex";
+
+import UnregList from "./UnregList.vue";
 export default {
   name: "LNB",
+  components: {
+    UnregList,
+  },
   props: {
     listView: {
       type: String,
@@ -40,6 +33,9 @@ export default {
 <style lang="scss" scoped>
 .scroll {
   height: calc(100vh - 102px);
+  :deep(.q-scrollarea__content) {
+    max-width: 100%;
+  }
 }
 .no-project {
   position: absolute;
