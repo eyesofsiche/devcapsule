@@ -11,8 +11,11 @@ const mutations = {
 };
 
 const actions = {
-  setList({ commit }, { list, options = { save: true } }) {
+  setList({ dispatch, commit }, { list, options = { save: true } }) {
     commit("SET_LIST", list);
+    dispatch("projects/setUnreg", list.map((folder) => folder.list).flat(), {
+      root: true,
+    });
     if (options.save) {
       window.electron.lowdb.set(
         "folders",

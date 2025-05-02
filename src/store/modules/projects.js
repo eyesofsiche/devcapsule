@@ -2,11 +2,15 @@ import * as devalue from "devalue";
 
 const state = {
   list: [],
+  unreg: [],
 };
 
 const mutations = {
   SET_LIST: (state, list) => {
     state.list = list;
+  },
+  SET_UNREG: (state, list) => {
+    state.unreg = list;
   },
 };
 
@@ -19,6 +23,10 @@ const actions = {
         devalue.parse(devalue.stringify(list))
       );
     }
+  },
+  setUnreg({ commit }, list) {
+    console.log("list", list);
+    commit("SET_UNREG", list);
   },
 };
 
