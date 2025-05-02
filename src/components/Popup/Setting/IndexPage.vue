@@ -34,6 +34,8 @@ q-dialog(
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 import FolderPage from "./components/FolderPage.vue";
 import GitPage from "./components/GitPage.vue";
 import NormalPage from "./components/NormalPage.vue";
@@ -47,6 +49,18 @@ export default {
   },
   props: {
     modelValue: Boolean,
+  },
+  computed: {
+    ...mapGetters(["settings"]),
+  },
+  watch: {
+    modelValue: {
+      handler(val) {
+        if (this.settings.autoRefresh) {
+          window.electron.autoRefresh(!val);
+        }
+      },
+    },
   },
   data() {
     return {

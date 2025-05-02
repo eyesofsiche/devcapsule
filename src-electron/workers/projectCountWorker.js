@@ -5,7 +5,6 @@ const { parentPort } = require("worker_threads");
 parentPort.on("message", async (folderPath) => {
   try {
     // node_modules를 제외하고 .env로 시작하는 모든 파일 검색
-    console.log("worker getProjectCount", folderPath);
     const envFiles = glob.sync(path.join(folderPath, "./**/.env*"), {
       ignore: [`${folderPath}/**/node_modules/**`],
     });

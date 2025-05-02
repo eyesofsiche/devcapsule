@@ -163,7 +163,7 @@ export default {
       try {
         // 비동기로 프로젝트 수 계산 요청
         window.electron
-          .invokeWithReply("cmd:get-project-count", { path }, 5 * 60 * 1000)
+          .invokeWithReply("cmd:scan-project", { path })
           .then((result) => {
             // 로딩 완료 및 결과 설정
             this.projectCounts[path] = {
