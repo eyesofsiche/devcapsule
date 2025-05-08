@@ -1,7 +1,11 @@
 <template lang="pug">
-q-item(clickable dense)
-  q-item-section(side :style="`width: ${width}; align-items: flex-end;`") {{ label }}
-  q-item-section {{ value || '-' }}
+q-item(v-if="value !== null" clickable dense)
+  template(v-if="!value && value !== null")
+    q-skeleton.q-mr-sm(type="text" :style="`width: ${width};`")
+    q-skeleton(type="text" :style="`width: ${randomWidth};`")
+  template(v-else-if="value !== null")
+    q-item-section(side :style="`width: ${width}; align-items: flex-end;`") {{ label }}
+    q-item-section {{ value || '-' }}
 </template>
 
 <script>
@@ -19,6 +23,16 @@ export default {
     width: {
       type: String,
       default: "auto",
+    },
+  },
+  computed: {
+    randomWidth() {
+      return Math.floor(Math.random() * 100) + 200 + "px";
+    },
+  },
+  watch: {
+    value(newValue) {
+      console.log(newValue);
     },
   },
 };

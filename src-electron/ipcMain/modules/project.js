@@ -41,4 +41,18 @@ export default function registerProjectHandlers() {
       event.reply(replyChannel, { success: false });
     }
   });
+
+  ipcMain.on("cmd:project-create", async (event, { replyChannel, path }) => {
+    try {
+      const info = await analyzeProject(path);
+      const result = {
+        path,
+        info,
+        success: true,
+      };
+      event.reply(replyChannel, result);
+    } catch (err) {
+      event.reply(replyChannel, { success: false });
+    }
+  });
 }

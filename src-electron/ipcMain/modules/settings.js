@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from "electron";
+import { ipcMain, dialog, shell } from "electron";
 
 export default function registerSettingsHandlers() {
   // 탐색기
@@ -7,5 +7,16 @@ export default function registerSettingsHandlers() {
       properties: ["openDirectory"],
     });
     return result.filePaths[0];
+  });
+
+  // Finder/탐색기에서 폴더 열기
+  ipcMain.handle("cmd:open-folder", async (_, folderPath) => {
+    try {
+      await shell.openPath(folderPath);
+      return { success: true };
+    } catch (err) {
+      console.error("❌ open-folder error:", err);
+      return { success: false, error: err.message };
+    }
   });
 }

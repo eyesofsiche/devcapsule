@@ -12,39 +12,51 @@ q-card.layout
         outlined
       )
 
-    .row.justify-end
+    .row.q-gutter-sm.justify-end
+      q-btn(
+        label="Finder 열기"
+        color="secondary"
+        dense
+        icon="mdi-folder-open"
+        @click="clickOpenFinder"
+      )
       q-btn(
         label="프로젝트 등록"
         color="primary"
         dense
+        icon="mdi-plus"
         @click="clickkRegister"
       )
 
-    q-list(v-if="info")
+    q-list
       q-item-label(header :style="`width: ${labelWidth};`")
         q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
         | 기본정보
-      label-value(label="이름" :value="info.name" :width="labelWidth")
-      label-value(label="버전" :value="info.version" :width="labelWidth")
-      label-value(label="설명" :value="info.description" :width="labelWidth")
-      label-value(label="라이센스" :value="info.license" :width="labelWidth")
+      //- q-item-label
+        q-skeleton(type="text")
+      label-value(label="이름" :value="info?.name" :width="labelWidth")
+      label-value(label="버전" :value="info?.version" :width="labelWidth")
+      label-value(label="설명" :value="info?.description" :width="labelWidth")
+      label-value(label="라이센스" :value="info?.license" :width="labelWidth")
+      label-value(label="디렉토리 크기" :value="info?.size" :width="labelWidth")
 
-      q-item-label(header :style="`width: ${labelWidth};`")
-        q-icon.q-mr-sm(name="mdi-git" size="20px" color="white")
-        | Git 정보
-      label-value(label="브랜치" :value="info.git?.currentBranch" :width="labelWidth")
-      label-value(label="remote" :value="info.git?.remotes[0]" :width="labelWidth")
-      label-value(label="마지막 커밋" :value="info.git?.lastCommit.message" :width="labelWidth")
+      template(v-if="info?.git")
+        q-item-label(header :style="`width: ${labelWidth};`")
+          q-icon.q-mr-sm(name="mdi-git" size="20px" color="white")
+          | Git 정보
+        label-value(label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
+        label-value(label="remote" :value="info?.git?.remotes[0]" :width="labelWidth")
+        label-value(label="마지막 커밋" :value="info?.git?.lastCommit.message" :width="labelWidth")
 
       //- q-item-label(header :style="`width: ${labelWidth};`")
         q-icon.q-mr-sm(name="mdi-book-multiple" size="20px" color="white")
         | 의존성
 
-      q-item-label(header :style="`width: ${labelWidth};`")
+      //- q-item-label(header :style="`width: ${labelWidth};`")
         q-icon.q-mr-sm(name="mdi-file-document-multiple" size="20px" color="white")
         | 구조
 
-      label-value(label="디렉토리 크기" :value="info.size" :width="labelWidth")
+      
 </template>
 
 <script>
@@ -81,6 +93,7 @@ export default {
   },
   methods: {
     fetchProject(path) {
+      this.info = null;
       window.electron
         .invokeWithReply("cmd:project-info", {
           path,
@@ -93,7 +106,28 @@ export default {
           }
         });
     },
-    clickkRegister() {},
+    async clickOpenFinder() {
+      const res = await window.electron.openFolder(this.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: "폴더 열기에 실패했습니다",
+        });
+      }
+    },
+    clickkRegister() {
+      window.electron
+        .invokeWithReply("cmd:project-create", {
+          path: this.path,
+        })
+        .then((result) => {
+          console.log(result);
+          const { success } = result;
+          if (success) {
+            this.info = result;
+          }
+        });
+    },
   },
 };
 </script>
