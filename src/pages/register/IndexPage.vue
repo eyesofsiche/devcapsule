@@ -47,28 +47,10 @@ q-card.layout
             q-icon.q-mr-sm(name="mdi-package-variant-remove" size="20px")
             | 해당 폴더 삭제
 
-    //- .row.q-gutter-sm.justify-end
-      q-btn(
-        label="Finder 열기"
-        color="secondary"
-        dense
-        icon="mdi-folder-open"
-        @click="clickOpenFinder"
-      )
-      q-btn(
-        label="프로젝트 등록"
-        color="primary"
-        dense
-        icon="mdi-plus"
-        @click="clickkRegister"
-      )
-
     q-list
       q-item-label(header :style="`width: ${labelWidth};`")
         q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
         | 기본정보
-      //- q-item-label
-        q-skeleton(type="text")
       label-value(label="경로" :value="info?.path" :width="labelWidth")
       label-value(label="이름" :value="info?.name" :width="labelWidth")
       label-value(label="버전" :value="info?.version" :width="labelWidth")
@@ -194,9 +176,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.title {
-  // font-size: 1.1rem;
-}
 .q-item__label--header {
   text-align: right;
   padding-right: 0;
