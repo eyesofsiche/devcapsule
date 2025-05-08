@@ -53,6 +53,8 @@ contextBridge.exposeInMainWorld("electron", {
     }
   },
   openFolder: (folderPath) => ipcRenderer.invoke("cmd:open-folder", folderPath),
+  removeFolder: (folderPath) =>
+    ipcRenderer.invoke("cmd:remove-folder", folderPath),
 
   // 창 컨트롤 기능 추가
   windowControl: {
