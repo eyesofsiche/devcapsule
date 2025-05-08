@@ -64,6 +64,18 @@ export default {
       return this.totalProjectCount - this.projects.length;
     },
   },
+  watch: {
+    $route: {
+      handler(to, from) {
+        if (to.name === "register") {
+          this.listView = "unregistered";
+        } else {
+          this.listView = "projects";
+        }
+      },
+      immediate: true,
+    },
+  },
   data() {
     return {
       listView: "projects",

@@ -4,6 +4,7 @@
   | 프로젝트가 존재하지 않습니다.
 template(v-else)
   q-virtual-scroll(
+    ref="virtScroll"
     :items="list"
     v-slot="{ item, index }"
     scroll-target="#scroll-lbn-area > .scroll"
@@ -31,9 +32,14 @@ export default {
     ...mapGetters(["projects"]),
   },
   watch: {
-    $route(to, from) {
-      this.active = parseInt(to.query.index);
-      console.log(this.active);
+    $route: {
+      handler(to, from) {
+        this.active = parseInt(to.query.index);
+        this.$nextTick(() => {
+          this.$refs.virtScroll.scrollTo(this.active);
+        });
+      },
+      immediate: true,
     },
     projects: {
       handler() {
@@ -45,7 +51,7 @@ export default {
   data() {
     return {
       list: [],
-      active: parseInt(this.$route.query.index),
+      active: null,
     };
   },
   methods: {
