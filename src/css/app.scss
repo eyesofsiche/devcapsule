@@ -10,6 +10,15 @@ body.body--dark {
 
   .q-card {
     background: #222223;
+
+    &.layout {
+      background: transparent;
+      height: 100vh;
+
+      .q-card__section {
+        height: calc(100vh - 52px);
+      }
+    }
   }
 
   // .sidebar {

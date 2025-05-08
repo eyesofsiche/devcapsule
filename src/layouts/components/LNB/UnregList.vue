@@ -12,8 +12,8 @@ template(v-else)
       q-item-section
         q-btn.full-width(
           align="left"
-          color="201F27"
-          flat
+          :color="index !== active ? '201F27' : 'blue-grey-9'"
+          :flat="index !== active"
           dense
           no-caps
           @click="clickProject(item, index)"
@@ -31,6 +31,10 @@ export default {
     ...mapGetters(["projects"]),
   },
   watch: {
+    $route(to, from) {
+      this.active = parseInt(to.query.index);
+      console.log(this.active);
+    },
     projects: {
       handler() {
         this.list = this.projects.unreg;
@@ -41,6 +45,7 @@ export default {
   data() {
     return {
       list: [],
+      active: parseInt(this.$route.query.index),
     };
   },
   methods: {
