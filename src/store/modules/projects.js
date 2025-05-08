@@ -25,7 +25,6 @@ const actions = {
     }
   },
   setUnreg({ commit }, list) {
-    console.log("list", list);
     commit("SET_UNREG", list);
   },
 };

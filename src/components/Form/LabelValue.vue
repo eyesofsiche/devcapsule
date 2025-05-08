@@ -32,7 +32,7 @@ export default {
   },
   watch: {
     value(newValue) {
-      console.log(newValue);
+      // console.log(newValue);
     },
   },
 };
