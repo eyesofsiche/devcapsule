@@ -85,8 +85,11 @@ export default {
   },
   methods: {
     clickListToggle() {
-      this.listView =
-        this.listView === "projects" ? "unregistered" : "projects";
+      if (this.listView === "projects") {
+        this.$router.push({ name: "register" });
+      } else {
+        this.$router.push({ name: "home" });
+      }
     },
     clickRefresh() {
       this.loadingRefresh = true;

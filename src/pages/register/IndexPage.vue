@@ -1,6 +1,12 @@
 <template lang="pug">
 q-card.layout
-  q-card-section
+  q-card-section(v-if="!path")
+    .row.justify-center.items-center(style="height: 100%;")
+      img(
+        src="@/assets/logo-1.png"
+        width="400px"
+      )
+  q-card-section(v-else)
     .row.items-center.q-gutter-sm.q-mb-md
       q-icon(
         name="mdi-subtitles-outline"
@@ -8,7 +14,7 @@ q-card.layout
         color="white"
       )
       flat-input.text-h6.col(
-        v-model="path"
+        v-model="projectName"
         outlined
       )
       q-btn-dropdown(
@@ -63,6 +69,7 @@ q-card.layout
         | 기본정보
       //- q-item-label
         q-skeleton(type="text")
+      label-value(label="경로" :value="info?.path" :width="labelWidth")
       label-value(label="이름" :value="info?.name" :width="labelWidth")
       label-value(label="버전" :value="info?.version" :width="labelWidth")
       label-value(label="설명" :value="info?.description" :width="labelWidth")
@@ -106,7 +113,12 @@ export default {
   watch: {
     $route: {
       handler(to, from) {
+        if (to.query.index === undefined) {
+          this.path = null;
+          return;
+        }
         this.path = this.projects.unreg[to.query.index];
+        this.projectName = this.path.split("/").pop();
         this.fetchProject(this.path);
       },
       immediate: true,
@@ -116,6 +128,7 @@ export default {
   data() {
     return {
       labelWidth: "130px",
+      projectName: "",
       path: null,
       info: null,
     };
@@ -132,6 +145,8 @@ export default {
           const { success } = result;
           if (success) {
             this.info = result;
+            this.info.path = path;
+            this.projectName = this.info?.name;
           }
         });
     },
