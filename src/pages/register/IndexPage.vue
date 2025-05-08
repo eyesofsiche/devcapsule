@@ -117,6 +117,7 @@ export default {
   methods: {
     fetchProject(path) {
       this.info = null;
+      this.projectName = "";
       window.electron
         .invokeWithReply("cmd:project-info", {
           path,
