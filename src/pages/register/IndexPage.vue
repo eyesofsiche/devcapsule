@@ -122,7 +122,6 @@ export default {
           path,
         })
         .then((result) => {
-          console.log(result);
           const { success } = result;
           if (success) {
             this.info = result;
@@ -141,16 +140,25 @@ export default {
       }
     },
     clickkRegister() {
-      window.electron
-        .invokeWithReply("cmd:project-create", {
-          path: this.path,
+      this.$q
+        .dialog({
+          title: "프로젝트 추가",
+          message: "정말로 해당 폴더를 등록하시겠습니까?",
+          persistent: true,
+          cancel: true,
         })
-        .then((result) => {
-          console.log(result);
-          const { success } = result;
-          if (success) {
-            this.info = result;
-          }
+        .onOk(async () => {
+          window.electron
+            .invokeWithReply("cmd:project-create", {
+              path: this.path,
+            })
+            .then((result) => {
+              // console.log(result);
+              // const { success } = result;
+              // if (success) {
+              //   this.info = result;
+              // }
+            });
         });
     },
     async clickkRemove() {

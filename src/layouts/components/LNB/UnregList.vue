@@ -12,12 +12,15 @@ template(v-else)
     q-item.q-pa-none(:key="index")
       q-item-section
         q-btn.full-width(
+          :ref="`btn-${index}`"
           align="left"
           :color="index !== active ? '201F27' : 'blue-grey-9'"
           :flat="index !== active"
           dense
           no-caps
           @click="clickProject(item, index)"
+          @keydown.up.prevent="focusPrev(index)"
+          @keydown.down.prevent="focusNext(index)"
         )
           q-icon(name="play_for_work" size="20px" color="white")
           span.label {{ item }}
@@ -37,6 +40,12 @@ export default {
         this.active = parseInt(to.query.index);
         this.$nextTick(() => {
           this.$refs.virtScroll.scrollTo(this.active);
+          setTimeout(() => {
+            const btnRef = this.$refs[`btn-${this.active}`];
+            if (btnRef && btnRef.$el) {
+              btnRef.$el.focus();
+            }
+          }, 100);
         });
       },
       immediate: true,
@@ -62,6 +71,26 @@ export default {
           index,
         },
       });
+    },
+    focusPrev(index) {
+      if (index > 0) {
+        this.$router.push({
+          name: "register",
+          query: {
+            index: index - 1,
+          },
+        });
+      }
+    },
+    focusNext(index) {
+      if (index < this.list.length - 1) {
+        this.$router.push({
+          name: "register",
+          query: {
+            index: index + 1,
+          },
+        });
+      }
     },
   },
 };
