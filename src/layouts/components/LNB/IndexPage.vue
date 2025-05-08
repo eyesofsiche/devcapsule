@@ -61,7 +61,7 @@ export default {
         .reduce((acc, curr) => acc + curr, 0);
     },
     unregisteredProjectCount() {
-      return this.totalProjectCount - this.projects.length;
+      return this.totalProjectCount - (this.projects.length || 0);
     },
   },
   watch: {
