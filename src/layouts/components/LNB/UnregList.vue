@@ -16,6 +16,7 @@ template(v-else)
           flat
           dense
           no-caps
+          @click="clickProject(item, index)"
         )
           q-icon(name="play_for_work" size="20px" color="white")
           span.label {{ item }}
@@ -41,6 +42,16 @@ export default {
     return {
       list: [],
     };
+  },
+  methods: {
+    clickProject(item, index) {
+      this.$router.push({
+        name: "register",
+        query: {
+          index,
+        },
+      });
+    },
   },
 };
 </script>

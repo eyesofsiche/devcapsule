@@ -15,10 +15,12 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "devalue": "^5.1.1",
+    "fast-folder-size": "^2.4.0",
     "lodash": "^4.17.21",
     "lowdb": "^7.0.1",
     "moment": "^2.30.1",
     "quasar": "^2.16.0",
+    "simple-git": "^3.27.0",
     "vue": "^3.4.18",
     "vue-router": "^4.0.12",
     "vuex": "^4.0.1"
