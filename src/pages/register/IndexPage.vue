@@ -118,7 +118,6 @@ export default {
           return;
         }
         this.path = this.projects.unreg[to.query.index];
-        this.projectName = this.path.split("/").pop();
         this.fetchProject(this.path);
       },
       immediate: true,
@@ -146,7 +145,7 @@ export default {
           if (success) {
             this.info = result;
             this.info.path = path;
-            this.projectName = this.info?.name;
+            this.projectName = this.info?.name || this.path.split("/").pop();
           }
         });
     },
