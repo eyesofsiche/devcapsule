@@ -1,8 +1,8 @@
 <template lang="pug">
 q-card.layout
   q-card-section
-    .row.items-center
-      q-icon.q-mr-sm(
+    .row.items-center.q-gutter-sm.q-mb-md
+      q-icon(
         name="mdi-subtitles-outline"
         size="30px"
         color="white"
@@ -11,8 +11,37 @@ q-card.layout
         v-model="path"
         outlined
       )
+      q-btn-dropdown(
+        color="white"
+        dropdown-icon="mdi-dots-vertical"
+        flat
+        no-icon-animation
+        content-class="context"
+      )
+        q-list
+          q-item(
+            clickable
+            v-ripple
+            @click="clickOpenFinder"
+          )
+            q-icon.q-mr-sm(name="mdi-folder-open" size="20px")
+            | Finder 열기
+          q-item(
+            clickable
+            v-ripple
+            @click="clickkRegister"
+          )
+            q-icon.q-mr-sm(name="mdi-pill" size="20px")
+            | 프로젝트 등록
+          q-item(
+            clickable
+            v-ripple
+            @click="clickkRemove"
+          )
+            q-icon.q-mr-sm(name="mdi-package-variant-remove" size="20px")
+            | 해당 폴더 삭제
 
-    .row.q-gutter-sm.justify-end
+    //- .row.q-gutter-sm.justify-end
       q-btn(
         label="Finder 열기"
         color="secondary"
@@ -128,6 +157,24 @@ export default {
           }
         });
     },
+    async clickkRemove() {
+      this.$q
+        .dialog({
+          title: "폴더 삭제",
+          message: "정말로 해당 폴더를 삭제하시겠습니까?",
+          persistent: true,
+          cancel: true,
+        })
+        .onOk(async () => {
+          const res = await window.electron.removeFolder(this.path);
+          if (!res.success) {
+            this.$q.notify({
+              type: "negative",
+              message: "폴더 삭제에 실패했습니다",
+            });
+          }
+        });
+    },
   },
 };
 </script>
@@ -145,6 +192,11 @@ export default {
   > .q-item__label {
     margin-top: 20px;
     margin-bottom: 10px;
+  }
+}
+.context {
+  .q-item {
+    min-height: auto;
   }
 }
 </style>

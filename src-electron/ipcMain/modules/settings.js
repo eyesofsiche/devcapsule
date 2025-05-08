@@ -19,4 +19,15 @@ export default function registerSettingsHandlers() {
       return { success: false, error: err.message };
     }
   });
+
+  // 폴더 지우기
+  ipcMain.handle("cmd:remove-folder", async (_, folderPath) => {
+    try {
+      await shell.trashItem(folderPath);
+      return { success: true };
+    } catch (err) {
+      console.error("❌ open-folder error:", err);
+      return { success: false, error: err.message };
+    }
+  });
 }
