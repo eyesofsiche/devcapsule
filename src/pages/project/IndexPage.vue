@@ -145,7 +145,7 @@ export default {
         });
     },
     async clickOpenFinder() {
-      const res = await window.electron.openFolder(this.path);
+      const res = await window.electron.openFolder(this.project.path);
       if (!res.success) {
         this.$q.notify({
           type: "negative",
