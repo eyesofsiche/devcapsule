@@ -4,7 +4,7 @@ import path from "path";
 
 import { initDB, readDB } from "./db/lowdb.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
-import { scanner } from "./middleware/projectScan.js";
+import { scanner } from "./services/scanProject.js";
 
 if (process.env.NODE_ENV === "development") {
   app.name = "DevCapsule-dev";

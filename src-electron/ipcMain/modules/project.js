@@ -1,7 +1,8 @@
 import { ipcMain } from "electron";
 
 import { analyzeProject } from "../../helpers/analyzeProject.js";
-import { scanner } from "../../middleware/projectScan.js";
+import { registerProject } from "../../services/registerProject.js";
+import { scanner } from "../../services/scanProject.js";
 
 export default function registerProjectHandlers() {
   // 자동 새로고침 설정 변경
@@ -42,17 +43,19 @@ export default function registerProjectHandlers() {
     }
   });
 
-  ipcMain.on("cmd:project-create", async (event, { replyChannel, path }) => {
-    try {
-      const info = await analyzeProject(path);
-      const result = {
-        path,
-        info,
-        success: true,
-      };
-      event.reply(replyChannel, result);
-    } catch (err) {
-      event.reply(replyChannel, { success: false });
+  ipcMain.on(
+    "cmd:project-create",
+    async (event, { replyChannel, path, name }) => {
+      console.log(path, name);
+      try {
+        // 프로젝트 등록
+        const result = await registerProject(path, name);
+
+        // DB folders에서 해당 프로젝트 제거
+        event.reply(replyChannel, result);
+      } catch (err) {
+        event.reply(replyChannel, { success: false });
+      }
     }
-  });
+  );
 }
