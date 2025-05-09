@@ -1,6 +1,7 @@
 <template lang="pug">
-q-page(:class="!path ? 'flex flex-center' : ''")
-  template(v-if="!path")
+//- div project
+q-page(:class="!project ? 'flex flex-center' : ''")
+  template(v-if="!project")
     img(
       src="@/assets/logo-1.png"
       width="400px"
@@ -38,15 +39,22 @@ q-page(:class="!path ? 'flex flex-center' : ''")
                 v-ripple
                 @click="clickkRegister"
               )
-                q-icon.q-mr-sm(name="mdi-pill" size="20px")
-                | 프로젝트 등록
+                q-icon.q-mr-sm(name="mdi-pill-off" size="20px")
+                | 프로젝트 제거
               q-item(
                 clickable
                 v-ripple
                 @click="clickkRemove"
               )
-                q-icon.q-mr-sm(name="mdi-package-variant-remove" size="20px")
-                | 해당 폴더 삭제
+                q-icon.q-mr-sm(name="mdi-archive-refresh-outline" size="20px")
+                | 프로젝트 복구
+              q-item(
+                clickable
+                v-ripple
+                @click="clickkRemove"
+              )
+                q-icon.q-mr-sm(name="mdi-archive-minus-outline" size="20px")
+                | 프로젝트 삭제
 
         q-list
           q-item-label(header :style="`width: ${labelWidth};`")
@@ -96,12 +104,14 @@ export default {
   watch: {
     $route: {
       handler(to, from) {
-        if (to.query.index === undefined) {
+        if (to.query.id === undefined) {
           this.path = null;
           return;
         }
-        this.path = this.projects.unreg[to.query.index];
-        this.fetchProject(this.path);
+        this.project = this.projects.list.find(
+          (item) => item.id === to.query.id
+        );
+        this.fetchProject();
       },
       immediate: true,
     },
@@ -111,24 +121,26 @@ export default {
     return {
       labelWidth: "130px",
       projectName: "",
+      project: null,
       path: null,
       info: null,
     };
   },
   methods: {
-    fetchProject(path) {
+    fetchProject() {
+      // console.log(path);
       this.info = null;
       this.projectName = "";
       window.electron
         .invokeWithReply("cmd:project-info", {
-          path,
+          path: this.project.path,
         })
         .then((result) => {
           const { success } = result;
           if (success) {
+            console.log(result);
             this.info = result;
-            this.info.path = path;
-            this.projectName = this.info?.name || this.path.split("/").pop();
+            this.projectName = this.project.name;
           }
         });
     },

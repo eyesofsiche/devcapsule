@@ -51,9 +51,12 @@ export async function updateDBSection(section, patch) {
   await db.read();
   if (!db.data) db.data = defaultData;
 
-  if (Array.isArray(db.data[section])) {
+  if (
+    Array.isArray(db.data[section]) ||
+    ["folders", "projects"].includes(section)
+  ) {
     // 원래 배열이었으면 통째로 교체
-    db.data[section] = patch;
+    db.data[section] = patch || [];
   } else {
     // 객체면 머지
     db.data[section] = {

@@ -12,7 +12,7 @@ function getWorkerPath(name) {
   }
 }
 
-export class ProjectScanner {
+export class ScanProject {
   constructor() {
     this.isRunning = false;
     this.abortScan = false;
@@ -142,4 +142,4 @@ export class ProjectScanner {
 }
 
 // 싱글톤 인스턴스
-export const scanner = new ProjectScanner();
+export const scanner = new ScanProject();
