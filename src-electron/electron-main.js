@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
+import windowStateKeeper from "electron-window-state";
 import os from "os";
 import path from "path";
 
@@ -19,13 +20,19 @@ const platform = process.platform || os.platform();
 let mainWindow;
 
 async function createWindow() {
-  /**
-   * Initial window options
-   */
+  // 창 위치/크기 이전 상태 불러오기
+  const mainWindowState = windowStateKeeper({
+    defaultWidth: 1000,
+    defaultHeight: 700,
+  });
+
+  // 브라우저 초기화
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, "icons/icon.png"), // tray icon
-    width: 1000,
-    height: 600,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     useContentSize: true,
     webPreferences: {
       contextIsolation: true,
@@ -36,6 +43,9 @@ async function createWindow() {
       sandbox: false,
     },
   });
+
+  // 창 위치/크기 저장
+  mainWindowState.manage(mainWindow);
 
   mainWindow.loadURL(process.env.APP_URL);
 
