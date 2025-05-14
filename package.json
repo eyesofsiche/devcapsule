@@ -15,6 +15,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "devalue": "^5.1.1",
+    "electron-window-state": "^5.0.3",
     "fast-folder-size": "^2.4.0",
     "lodash": "^4.17.21",
     "lowdb": "^7.0.1",
