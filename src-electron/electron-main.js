@@ -3,16 +3,9 @@ import windowStateKeeper from "electron-window-state";
 import os from "os";
 import path from "path";
 
-import { initDB, readDB } from "./db/lowdb.js";
+import { initAllDB, readSection } from "./db/lowdb/index.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
 import { scanner } from "./services/scanProject.js";
-
-if (process.env.NODE_ENV === "development") {
-  app.name = "DevCapsule-dev";
-} else {
-  app.name = "DevCapsule";
-}
-console.log("process.env.NODE_ENV", process.env.NODE_ENV, app.name);
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -104,12 +97,12 @@ async function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  await initDB();
+  await initAllDB();
   await createWindow();
   await registerAllIpcHandlers();
 
-  const db = await readDB();
-  if (db.settings?.autoRefresh) {
+  const settingsDB = await readSection("settings");
+  if (settingsDB.autoRefresh) {
     scanner.startAuto();
   }
 });

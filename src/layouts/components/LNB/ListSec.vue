@@ -47,7 +47,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["folders", "projects"]),
+    ...mapGetters(["watchs", "projects"]),
   },
   watch: {
     $route: {

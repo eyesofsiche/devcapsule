@@ -11,7 +11,7 @@
           dense
           @click="clickListToggle"
         ) 미등록 프로젝트
-          template(v-if="folders.length < 1")
+          template(v-if="watchs.length < 1")
             q-tooltip.bg-red(
               anchor="center middle"
               self="center middle"
@@ -54,9 +54,9 @@ export default {
     ListSec,
   },
   computed: {
-    ...mapGetters(["folders", "projects"]),
+    ...mapGetters(["watchs", "projects"]),
     totalProjectCount() {
-      return this.folders
+      return this.watchs
         .map((item) => item.count)
         .reduce((acc, curr) => acc + curr, 0);
     },

@@ -73,7 +73,7 @@ import { mapGetters } from "vuex";
 export default {
   name: "FolderPage",
   computed: {
-    ...mapGetters(["folders"]),
+    ...mapGetters(["watchs"]),
     isEdit() {
       if (this.originPaths.length !== this.selectedPaths.length) {
         return true;
@@ -89,7 +89,7 @@ export default {
     },
   },
   watch: {
-    folders: {
+    watchs: {
       handler(val) {
         this.init(val);
       },
@@ -189,7 +189,7 @@ export default {
     },
 
     clickCancel() {
-      this.init(this.folders);
+      this.init(this.watchs);
     },
 
     clickSave() {
@@ -199,7 +199,7 @@ export default {
         list: this.projectCounts[path]?.list || [],
       }));
 
-      this.$store.dispatch("folders/setList", {
+      this.$store.dispatch("watchs/setList", {
         list: formattedData,
       });
       this.clickCancel();

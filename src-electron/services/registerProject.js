@@ -3,8 +3,8 @@ import { existsSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
-import { readDB, writeDB } from "../db/lowdb.js";
 import { analyzeProject } from "../helpers/analyzeProject.js";
+import { updateProject } from "./updateProject.js";
 
 /**
  * 프로젝트 등록
@@ -48,29 +48,11 @@ export async function registerProject(folderPath, projectName = "no title") {
   );
 
   // 4. local DB에 등록
-  const db = await readDB();
-  const alreadyExists = db.projects?.some((p) => p.id === devcapsule.id);
-
-  if (!alreadyExists) {
-    db.projects = db.projects || [];
-    db.projects.push({
-      id: devcapsule.id,
-      name: projectName,
-      path: folderPath,
-      enabled: true,
-      watching: true,
-      lastSynced: null,
-    });
-
-    // folders list에 경로 제거
-    db.folders.forEach((folder) => {
-      if (folder.list.includes(folderPath)) {
-        folder.list = folder.list.filter((item) => item !== folderPath);
-        folder.count -= 1;
-      }
-    });
-    await writeDB(db);
-  }
+  await updateProject({
+    id: devcapsule.id,
+    name: projectName,
+    folderPath,
+  });
 
   return {
     success: true,

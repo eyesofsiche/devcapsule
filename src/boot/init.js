@@ -10,17 +10,19 @@ export default boot(async ({ app, store, router }) => {
   // });
   app.config.globalProperties.$_ = _;
 
-  const db = await window.electron.lowdb.get();
+  const settings = await window.electron.lowdb.get("settings");
+  const watchs = await window.electron.lowdb.get("watchs");
+  const projects = await window.electron.lowdb.get("projects");
   store.dispatch("settings/setSettings", {
-    data: db.settings,
+    data: settings,
     options: { save: false },
   });
-  store.dispatch("folders/setList", {
-    list: db.folders,
+  store.dispatch("watchs/setList", {
+    list: watchs,
     options: { save: false },
   });
   store.dispatch("projects/setList", {
-    list: db.projects,
+    list: projects,
     options: { save: false },
   });
 });
