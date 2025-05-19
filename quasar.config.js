@@ -10,8 +10,9 @@
 
 const path = require("path");
 const { configure } = require("quasar/wrappers");
+const appName = "DevCapsule";
 
-module.exports = configure(function (/* ctx */) {
+module.exports = configure(function (ctx) {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -181,8 +182,19 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
     electron: {
-      // extendElectronMainConf (esbuildConf)
-      // extendElectronPreloadConf (esbuildConf)
+      extendElectronMainConf(esbuildConfig) {
+        esbuildConfig.define = {
+          ...esbuildConfig.define,
+          __APP_NAME__: JSON.stringify(ctx.dev ? `${appName}-dev` : appName),
+        };
+      },
+
+      extendElectronPreloadConf(esbuildConfig) {
+        esbuildConfig.define = {
+          ...esbuildConfig.define,
+          __APP_NAME__: JSON.stringify(ctx.dev ? `${appName}-dev` : appName),
+        };
+      },
 
       // specify the debugging port to use for the Electron app when running in development mode
       inspectPort: 5858,
@@ -191,7 +203,7 @@ module.exports = configure(function (/* ctx */) {
 
       builder: {
         appId: "com.github.eyesofsiche.devcapsule",
-        productName: "DevCapsule",
+        productName: appName,
         mac: {
           category: "public.app-category.developer-tools",
           target: "dmg",
