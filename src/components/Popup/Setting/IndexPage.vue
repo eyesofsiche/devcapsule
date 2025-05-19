@@ -16,15 +16,15 @@ q-dialog(
       dark
     )
       q-tab(name="normal" icon="mdi-cog-outline" label="일반")
-      q-tab(name="folder" icon="mdi-folder-sync-outline" label="감시폴더")
+      q-tab(name="watch" icon="mdi-folder-sync-outline" label="감시폴더")
       //- q-tab(name="git" icon="mdi-git" label="저장소")
     q-separator
 
     q-tab-panels(v-model="tab" animated style="height: 300px")
       q-tab-panel(name="normal")
         normal-page(@close="close")
-      q-tab-panel(name="folder")
-        folder-page(@close="close")
+      q-tab-panel(name="watch")
+        watch-page(@close="close")
       q-tab-panel(name="git")
         git-page(@close="close")
 
@@ -36,16 +36,16 @@ q-dialog(
 <script>
 import { mapGetters } from "vuex";
 
-import FolderPage from "./components/FolderPage.vue";
 import GitPage from "./components/GitPage.vue";
 import NormalPage from "./components/NormalPage.vue";
+import WatchPage from "./components/WatchPage.vue";
 
 export default {
   name: "SettingPage",
   components: {
     NormalPage,
     GitPage,
-    FolderPage,
+    WatchPage,
   },
   props: {
     modelValue: Boolean,

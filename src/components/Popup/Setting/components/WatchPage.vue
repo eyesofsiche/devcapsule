@@ -1,5 +1,5 @@
 <template lang="pug">
-.folder-page
+.watch-page
   .text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
 
   q-list.q-mt-md(separator bordered)
@@ -71,7 +71,7 @@
 import { mapGetters } from "vuex";
 
 export default {
-  name: "FolderPage",
+  name: "WatchPage",
   computed: {
     ...mapGetters(["watchs"]),
     isEdit() {
