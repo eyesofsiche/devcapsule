@@ -37,16 +37,18 @@ export default {
   watch: {
     $route: {
       handler(to, from) {
-        this.active = parseInt(to.query.index);
-        this.$nextTick(() => {
-          this.$refs.virtScroll.scrollTo(this.active);
-          setTimeout(() => {
-            const btnRef = this.$refs[`btn-${this.active}`];
-            if (btnRef && btnRef.$el) {
-              btnRef.$el.focus();
-            }
-          }, 100);
-        });
+        if (to.query.index) {
+          this.active = parseInt(to.query.index);
+          this.$nextTick(() => {
+            this.$refs.virtScroll.scrollTo(this.active);
+            setTimeout(() => {
+              const btnRef = this.$refs[`btn-${this.active}`];
+              if (btnRef && btnRef.$el) {
+                btnRef.$el.focus();
+              }
+            }, 100);
+          });
+        }
       },
       immediate: true,
     },
