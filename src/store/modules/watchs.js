@@ -18,7 +18,7 @@ const actions = {
     });
     if (options.save) {
       window.electron.lowdb.set(
-        "watch",
+        "watchs",
         devalue.parse(devalue.stringify(list))
       );
     }
