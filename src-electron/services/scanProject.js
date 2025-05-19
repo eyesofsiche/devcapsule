@@ -2,7 +2,7 @@ import { app } from "electron";
 import path from "path";
 import { Worker } from "worker_threads";
 
-import { readDB, updateDBSection } from "../db/lowdb.js";
+import { readSection, writeSection } from "../db/lowdb/index.js";
 
 function getWorkerPath(name) {
   if (app.isPackaged) {
@@ -71,11 +71,10 @@ export class ScanProject {
     this.abortScan = false;
     this.isRunning = true;
 
-    const db = await readDB();
-    const folders = db.folders || [];
+    const watchsDB = await readSection("watchs");
     const result = [];
 
-    for (const { path: folderPath } of folders) {
+    for (const { path: folderPath } of watchsDB) {
       // 중간 취소 체크
       if (this.abortScan) {
         this.isRunning = false;
@@ -96,7 +95,7 @@ export class ScanProject {
     }
 
     // 결과 기록
-    await updateDBSection("folders", result);
+    await writeSection("watchs", result);
     this.isRunning = false;
     return { success: true };
   }
@@ -133,8 +132,8 @@ export class ScanProject {
     this.stopAuto();
     const res = await this.fullScan({ type: "manual" });
     // 필요하다면 설정값을 읽어서 auto가 on 상태면 재시작
-    const db = await readDB();
-    if (db.settings?.autoRefresh) {
+    const settingDB = await readSection("settings");
+    if (settingDB.autoRefresh) {
       this.startAuto();
     }
     return res;

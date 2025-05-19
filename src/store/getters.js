@@ -1,6 +1,6 @@
 const getters = {
   settings: (state) => state.settings,
-  folders: (state) => state.folders.list,
+  watchs: (state) => state.watchs.list,
   projects: (state) => state.projects,
 };
 export default getters;

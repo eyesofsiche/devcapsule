@@ -30,15 +30,16 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
-import { invokeWithReply } from "./middleware/ipcClient.js";
+import { invokeWithReply } from "./utils/ipc.js";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electron", {
   invokeWithReply,
   lowdb: {
-    get: () => ipcRenderer.invoke("lowdb:get"),
+    get: (key) => ipcRenderer.invoke("lowdb:get", key),
     set: (key, value) => ipcRenderer.invoke("lowdb:set", { key, value }),
+    write: (key, value) => ipcRenderer.invoke("lowdb:write", { key, value }),
   },
   autoRefresh: (flag, type) => {
     ipcRenderer.send("cmd:change-auto-refresh", flag);

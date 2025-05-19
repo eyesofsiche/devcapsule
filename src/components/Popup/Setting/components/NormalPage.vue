@@ -45,12 +45,12 @@ const defaultForm = {
 export default {
   name: "NormalPage",
   computed: {
-    ...mapGetters(["settings", "folders"]),
+    ...mapGetters(["settings", "watchs"]),
     isEdit() {
       return !this.$_.isEqual(this.originForm, this.postForm);
     },
     isDisableRefresh() {
-      return this.folders.length < 1;
+      return this.watchs.length < 1;
     },
   },
   watch: {
