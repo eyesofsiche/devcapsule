@@ -19,42 +19,10 @@ q-page(:class="!project ? 'flex flex-center' : ''")
             v-model="projectName"
             outlined
           )
-          q-btn-dropdown(
-            color="white"
-            dropdown-icon="mdi-dots-vertical"
-            flat
-            no-icon-animation
-            content-class="context"
+          project-menu(
+            type="project"
+            :info="project"
           )
-            q-list
-              q-item(
-                clickable
-                v-ripple
-                @click="clickOpenFinder"
-              )
-                q-icon.q-mr-sm(name="mdi-folder-open" size="20px")
-                | Finder 열기
-              q-item(
-                clickable
-                v-ripple
-                @click="clickkRegister"
-              )
-                q-icon.q-mr-sm(name="mdi-pill-off" size="20px")
-                | 프로젝트 제거
-              q-item(
-                clickable
-                v-ripple
-                @click="clickkRemove"
-              )
-                q-icon.q-mr-sm(name="mdi-archive-refresh-outline" size="20px")
-                | 프로젝트 복구
-              q-item(
-                clickable
-                v-ripple
-                @click="clickkRemove"
-              )
-                q-icon.q-mr-sm(name="mdi-archive-minus-outline" size="20px")
-                | 프로젝트 삭제
 
         q-list
           q-item-label(header :style="`width: ${labelWidth};`")
@@ -89,14 +57,22 @@ q-page(:class="!project ? 'flex flex-center' : ''")
 <script>
 import { mapGetters } from "vuex";
 
+import ProjectMenu from "@/components/ContextMenu/ProjectMenu.vue";
 import FlatInput from "@/components/Form/FlatInput.vue";
 import LabelValue from "@/components/Form/LabelValue.vue";
+
+const defaultInfo = {
+  id: "",
+  name: "",
+  path: "",
+};
 
 export default {
   name: "RegisterPage",
   components: {
     FlatInput,
     LabelValue,
+    ProjectMenu,
   },
   computed: {
     ...mapGetters(["projects"]),
@@ -121,14 +97,13 @@ export default {
     return {
       labelWidth: "130px",
       projectName: "",
-      project: null,
+      project: this.$_.cloneDeep(defaultInfo),
       path: null,
       info: null,
     };
   },
   methods: {
     fetchProject() {
-      // console.log(path);
       this.info = null;
       this.projectName = "";
       window.electron
@@ -138,68 +113,8 @@ export default {
         .then((result) => {
           const { success } = result;
           if (success) {
-            console.log(result);
             this.info = result;
             this.projectName = this.project.name;
-          }
-        });
-    },
-    async clickOpenFinder() {
-      const res = await window.electron.openFolder(this.project.path);
-      if (!res.success) {
-        this.$q.notify({
-          type: "negative",
-          message: "폴더 열기에 실패했습니다",
-        });
-      }
-    },
-    clickkRegister() {
-      this.$q
-        .dialog({
-          title: "프로젝트 추가",
-          message: "정말로 해당 폴더를 등록하시겠습니까?",
-          persistent: true,
-          cancel: true,
-        })
-        .onOk(async () => {
-          window.electron
-            .invokeWithReply("cmd:project-create", {
-              path: this.path,
-              name: this.projectName,
-            })
-            .then((result) => {
-              const { success, id } = result;
-              if (success) {
-                // this.info = result;
-                this.$router.push({
-                  name: "project",
-                  params: {
-                    id,
-                  },
-                });
-                this.$q.notify({
-                  type: "positive",
-                  message: "프로젝트 등록에 성공했습니다",
-                });
-              }
-            });
-        });
-    },
-    async clickkRemove() {
-      this.$q
-        .dialog({
-          title: "폴더 삭제",
-          message: "정말로 해당 폴더를 삭제하시겠습니까?",
-          persistent: true,
-          cancel: true,
-        })
-        .onOk(async () => {
-          const res = await window.electron.removeFolder(this.path);
-          if (!res.success) {
-            this.$q.notify({
-              type: "negative",
-              message: "폴더 삭제에 실패했습니다",
-            });
           }
         });
     },
@@ -217,11 +132,6 @@ export default {
   > .q-item__label {
     margin-top: 20px;
     margin-bottom: 10px;
-  }
-}
-.context {
-  .q-item {
-    min-height: auto;
   }
 }
 </style>
