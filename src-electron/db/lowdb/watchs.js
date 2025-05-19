@@ -78,7 +78,7 @@ export async function write(data = []) {
 export async function update(patch) {
   await db.read();
 
-  const idx = db.data.watch.findIndex((item) => item.path === patch.path);
+  const idx = db.data.watchs.findIndex((item) => item.path === patch.path);
   if (idx === -1) {
     db.data.watchs.push(patch);
   } else {
