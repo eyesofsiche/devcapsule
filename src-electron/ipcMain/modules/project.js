@@ -2,6 +2,7 @@ import { ipcMain } from "electron";
 
 import { analyzeProject } from "../../helpers/analyzeProject.js";
 import { registerProject } from "../../services/registerProject.js";
+import { removeProject } from "../../services/removeProject.js";
 import { scanner } from "../../services/scanProject.js";
 
 export default function registerProjectHandlers() {
@@ -34,7 +35,7 @@ export default function registerProjectHandlers() {
     }
   });
 
-  ipcMain.on("cmd:project-info", async (event, { replyChannel, path }) => {
+  ipcMain.on("cmd:info-project", async (event, { replyChannel, path }) => {
     try {
       const result = await analyzeProject(path);
       event.reply(replyChannel, result);
@@ -44,7 +45,7 @@ export default function registerProjectHandlers() {
   });
 
   ipcMain.on(
-    "cmd:project-create",
+    "cmd:create-project",
     async (event, { replyChannel, path, name }) => {
       console.log(path, name);
       try {
@@ -58,4 +59,18 @@ export default function registerProjectHandlers() {
       }
     }
   );
+
+  ipcMain.on("cmd:remove-project", async (event, { replyChannel, id }) => {
+    console.log(id);
+    try {
+      // 프로젝트 등록
+      const result = await removeProject(id);
+      console.log(result);
+
+      // DB folders에서 해당 프로젝트 제거
+      event.reply(replyChannel, result);
+    } catch (err) {
+      event.reply(replyChannel, { success: false });
+    }
+  });
 }

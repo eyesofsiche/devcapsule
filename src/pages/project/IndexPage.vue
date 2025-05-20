@@ -107,7 +107,7 @@ export default {
       this.info = null;
       this.projectName = "";
       window.electron
-        .invokeWithReply("cmd:project-info", {
+        .invokeWithReply("cmd:info-project", {
           path: this.project.path,
         })
         .then((result) => {

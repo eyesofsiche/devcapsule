@@ -18,14 +18,14 @@ q-btn-dropdown(
       q-item(
         clickable
         v-ripple
-        @click="$emit('clickRemoveProject')"
+        @click="clickRemoveProject"
       )
         q-icon.q-mr-sm(name="mdi-pill-off" size="20px")
         | 프로젝트 제거
       q-item(
         clickable
         v-ripple
-        @click="$emit('clickRestoreProject')"
+        @click="clickRestoreProject"
       )
         q-icon.q-mr-sm(name="mdi-archive-refresh-outline" size="20px")
         | 프로젝트 복구
@@ -33,14 +33,14 @@ q-btn-dropdown(
       v-else-if="type === 'watch'"
       clickable
       v-ripple
-      @click="$emit('clickAddProject')"
+      @click="clickAddProject"
     )
       q-icon.q-mr-sm(name="mdi-pill" size="20px")
       | 프로젝트 등록
     q-item(
       clickable
       v-ripple
-      @click="$emit('clickRemoveFolder')"
+      @click="clickRemoveFolder"
     )
       q-icon.q-mr-sm(name="mdi-package-variant-remove" size="20px")
       | 해당 폴더 삭제
@@ -60,7 +60,6 @@ export default {
       default: "project",
     },
   },
-  emits: ["clickRemoveProject", "clickAddProject", "clickRemoveFolder"],
   methods: {
     // Finder 열기
     async clickOpenFinder() {
@@ -84,7 +83,7 @@ export default {
         })
         .onOk(async () => {
           window.electron
-            .invokeWithReply("cmd:project-create", {
+            .invokeWithReply("cmd:create-project", {
               path: this.info.path,
               name: this.info.projectName,
             })
@@ -104,6 +103,60 @@ export default {
                 });
               }
             });
+        });
+    },
+
+    // 프로젝트 제거
+    clickRemoveProject() {
+      this.$q
+        .dialog({
+          title: "프로젝트 제거",
+          message: "정말로 해당 프로젝트를 제거하시겠습니까?",
+          persistent: true,
+          cancel: true,
+        })
+        .onOk(async () => {
+          window.electron
+            .invokeWithReply("cmd:remove-project", {
+              id: this.info.id,
+            })
+            .then(async (result) => {
+              const { success } = result;
+              if (success) {
+                // // TODO: store에 등록
+                await this.$store.dispatch("projects/init", {
+                  id: this.info.id,
+                });
+                this.$router.replace({
+                  name: "project",
+                });
+              } else {
+                this.$q.notify({
+                  type: "negative",
+                  message: "프로젝트 제거에 실패했습니다",
+                });
+              }
+            });
+        });
+    },
+
+    // 프로젝트 복구
+    clickRestoreProject() {
+      this.$q
+        .dialog({
+          title: "프로젝트 복구",
+          message: "정말로 해당 프로젝트를 복구하시겠습니까?",
+          persistent: true,
+          cancel: true,
+        })
+        .onOk(async () => {
+          // const res = await window.electron.restoreProject(this.info.path);
+          // if (!res.success) {
+          //   this.$q.notify({
+          //     type: "negative",
+          //     message: "프로젝트 복구에 실패했습니다",
+          //   });
+          // }
         });
     },
 

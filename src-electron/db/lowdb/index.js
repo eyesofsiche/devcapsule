@@ -31,3 +31,8 @@ export async function updateSection(name, patch) {
   if (!modules[name]) throw new Error(`Unknown DB module: ${name}`);
   return await modules[name].update(patch);
 }
+
+export async function removeSection(name, id) {
+  if (!modules[name]) throw new Error(`Unknown DB module: ${name}`);
+  return await modules[name].remove(id);
+}
