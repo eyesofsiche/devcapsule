@@ -87,13 +87,15 @@ export default {
               path: this.info.path,
               name: this.info.projectName,
             })
-            .then((result) => {
+            .then(async (result) => {
               const { success, id } = result;
               if (success) {
-                // TODO: store에 등록
+                await this.$store.dispatch("watchs/addProject", {
+                  path: this.info.path,
+                });
                 this.$router.push({
                   name: "project",
-                  params: {
+                  query: {
                     id,
                   },
                 });
