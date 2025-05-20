@@ -72,9 +72,10 @@ export default {
       immediate: true,
     },
     projects: {
-      handler() {
-        this.list = this.projects.list;
+      handler(val) {
+        this.list = val.list;
       },
+      deep: true,
       immediate: true,
     },
   },

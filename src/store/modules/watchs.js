@@ -23,6 +23,18 @@ const actions = {
       );
     }
   },
+  async addProject({ state, dispatch }, { path }) {
+    const result = state.list.map((watch) => {
+      watch.list = watch.list.filter((paths) => paths !== path);
+      watch.count = watch.list.length;
+      return watch;
+    });
+    dispatch("setList", {
+      list: result,
+      options: { save: true },
+    });
+    await dispatch("projects/init", {}, { root: true });
+  },
 };
 
 export default {
