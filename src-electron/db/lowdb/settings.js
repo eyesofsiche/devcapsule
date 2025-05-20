@@ -77,3 +77,7 @@ export async function update(patch) {
   };
   await db.write();
 }
+
+export async function remove(id) {
+  return false;
+}

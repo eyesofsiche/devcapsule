@@ -87,3 +87,15 @@ export async function update(patch) {
 
   await db.write();
 }
+
+export async function remove(id) {
+  await db.read();
+
+  const idx = db.data.projects.findIndex((item) => item.id === id);
+  if (idx !== -1) {
+    db.data.projects.splice(idx, 1);
+    await db.write();
+    return true;
+  }
+  return false;
+}

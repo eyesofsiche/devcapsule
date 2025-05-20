@@ -102,7 +102,7 @@ export default {
       this.info = this.$_.cloneDeep(defaultInfo);
       this.projectName = "";
       window.electron
-        .invokeWithReply("cmd:project-info", {
+        .invokeWithReply("cmd:info-project", {
           path,
         })
         .then((result) => {

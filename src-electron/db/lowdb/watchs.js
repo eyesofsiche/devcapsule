@@ -89,3 +89,15 @@ export async function update(patch) {
 
   await db.write();
 }
+
+export async function remove(path) {
+  await db.read();
+
+  const idx = db.data.watchs.findIndex((item) => item.path === path);
+  if (idx !== -1) {
+    db.data.watchs.splice(idx, 1);
+    await db.write();
+    return true;
+  }
+  return false;
+}

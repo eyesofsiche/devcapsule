@@ -12,7 +12,6 @@ export default boot(async ({ app, store, router }) => {
 
   const settings = await window.electron.lowdb.get("settings");
   const watchs = await window.electron.lowdb.get("watchs");
-  const projects = await window.electron.lowdb.get("projects");
   store.dispatch("settings/setSettings", {
     data: settings,
     options: { save: false },
@@ -21,8 +20,5 @@ export default boot(async ({ app, store, router }) => {
     list: watchs,
     options: { save: false },
   });
-  store.dispatch("projects/setList", {
-    list: projects,
-    options: { save: false },
-  });
+  store.dispatch("projects/init");
 });
