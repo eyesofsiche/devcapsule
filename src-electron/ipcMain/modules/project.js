@@ -65,7 +65,6 @@ export default function registerProjectHandlers() {
     try {
       // 프로젝트 등록
       const result = await removeProject(id);
-      console.log(result);
 
       // DB folders에서 해당 프로젝트 제거
       event.reply(replyChannel, result);

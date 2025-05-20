@@ -74,6 +74,9 @@ export class ScanProject {
     const watchsDB = await readSection("watchs");
     const result = [];
 
+    const projectsDB = await readSection("projects");
+    const projectList = projectsDB.map((project) => project.path);
+
     for (const { path: folderPath } of watchsDB) {
       // 중간 취소 체크
       if (this.abortScan) {
@@ -83,10 +86,11 @@ export class ScanProject {
 
       try {
         const info = await this.scanFolder(folderPath);
+        const list = info.list.filter((path) => !projectList.includes(path));
         result.push({
           path: folderPath,
-          count: info.count,
-          list: info.list,
+          count: list.length,
+          list,
         });
       } catch (err) {
         this.isRunning = false;
@@ -97,7 +101,7 @@ export class ScanProject {
     // 결과 기록
     await writeSection("watchs", result);
     this.isRunning = false;
-    return { success: true };
+    return { success: true, result };
   }
 
   // 자동 스캔 시작

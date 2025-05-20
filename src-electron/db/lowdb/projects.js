@@ -1,13 +1,11 @@
-import { app } from "electron";
 import fs from "fs/promises";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
 import path from "path";
 
-const filePath = path.join(
-  path.join(app.getPath("appData"), __APP_NAME__),
-  "db/lowdb/projects.json"
-);
+import { getUserDataPath } from "../../utils/userData.js";
+
+const filePath = path.join(getUserDataPath(), "db/lowdb/projects.json");
 const adapter = new JSONFile(filePath);
 const defaultData = {
   version: 1,
