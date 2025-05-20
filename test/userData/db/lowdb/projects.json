@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "855f93ce-daa7-4085-b618-661bf2987595",
+      "name": "vue-element-admin",
+      "path": "/Users/siche/Documents/_back/bluenmobile/smartblock/v2.admin",
+      "lastSynced": null
+    },
+    {
+      "id": "b1b7b095-290d-4647-a2ed-01f70655d134",
+      "name": "vuecli",
+      "path": "/Users/siche/Documents/_back/doosan_v1/app_before",
+      "lastSynced": null
+    },
+    {
+      "id": "e1520b6f-8abf-42b7-90cd-1f2548d41c1c",
+      "name": "vue-element-admin",
+      "path": "/Users/siche/Documents/_back/doosan_v1/_file/element-ui",
+      "lastSynced": null
+    },
+    {
+      "id": "4cc90edd-4521-4297-9afa-a01ce8fa38db",
+      "name": "rental",
+      "path": "/Users/siche/Documents/afterRiver/rental/api",
+      "lastSynced": null
+    },
+    {
+      "id": "4eb2527f-ec99-4e45-9a5d-9479b84884fc",
+      "name": "vuecli",
+      "path": "/Users/siche/Documents/_back/doosan_v1/app",
+      "lastSynced": null
+    },
+    {
+      "id": "337e9317-e8e0-4410-94af-d579b9b97c31",
+      "name": "vue-element-admin",
+      "path": "/Users/siche/Documents/_back/badanamu/admin",
+      "lastSynced": null
+    },
+    {
+      "id": "4f2fb348-7d12-4fde-a652-e13d2cc762e0",
+      "name": "badanamu-api",
+      "path": "/Users/siche/Documents/_back/badanamu/api",
+      "lastSynced": null
+    },
+    {
+      "id": "f180388e-9c23-4e1e-a51c-15806321c8f5",
+      "name": "test-template",
+      "path": "/Users/siche/Documents/_back/ddxp_v1/ds-ddxp-app-2022",
+      "lastSynced": null
+    },
+    {
+      "id": "5e1b1a07-c57c-4203-81b7-901b1cc95039",
+      "name": "blue-workspace-api",
+      "path": "/Users/siche/Documents/_back/bluenmobile/utils/blueWork/api",
+      "lastSynced": null
+    },
+    {
+      "id": "3f2c037e-5690-4bc5-8a8c-7c2c8f41dc8b",
+      "name": "trellobot",
+      "path": "/Users/siche/Documents/_back/bluenmobile/utils/trello-bot",
+      "lastSynced": null
+    },
+    {
+      "id": "b780d222-b6a6-4130-ba44-75bff639bed5",
+      "name": "test-template",
+      "path": "/Users/siche/Documents/_back/ddxp_v1/_ds-ddxp-app-2022",
+      "lastSynced": null
+    },
+    {
+      "id": "59c808a3-9b07-473a-a25f-48609eb8f306",
+      "name": "tenunder-api",
+      "path": "/Users/siche/Documents/_back/bluenmobile/utils/alarm",
+      "lastSynced": null
+    },
+    {
+      "id": "6f5fe2fd-ddca-499a-8032-18ef7976f363",
+      "name": "vuecli",
+      "path": "/Users/siche/Documents/_back/doosan_v1/web",
+      "lastSynced": null
+    }
+  ]
+}

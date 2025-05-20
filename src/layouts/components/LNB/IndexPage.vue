@@ -54,7 +54,7 @@ export default {
     ListSec,
   },
   computed: {
-    ...mapGetters(["watchs", "projects"]),
+    ...mapGetters(["watchs", "projects", "refresh"]),
     totalProjectCount() {
       return this.watchs
         .map((item) => item.count)
@@ -74,6 +74,15 @@ export default {
         }
       },
       immediate: true,
+    },
+    refresh: {
+      handler(val) {
+        this.$nextTick(() => {
+          if (val) {
+            this.clickRefresh();
+          }
+        });
+      },
     },
   },
   data() {
@@ -96,8 +105,13 @@ export default {
       window.electron
         .invokeWithReply("cmd:manual-refresh")
         .then((req) => {
-          const { success, error } = req;
-          if (!success) {
+          const { success, error, result } = req;
+          if (success) {
+            this.$store.dispatch("watchs/setList", {
+              list: result,
+              options: { save: false },
+            });
+          } else {
             this.$q.notify({
               type: "negative",
               message: error,
@@ -106,6 +120,7 @@ export default {
         })
         .finally(() => {
           this.loadingRefresh = false;
+          this.$store.dispatch("watchs/setRefresh", false);
         });
     },
   },

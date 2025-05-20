@@ -125,12 +125,10 @@ export default {
             .then(async (result) => {
               const { success } = result;
               if (success) {
-                // // TODO: store에 등록
-                await this.$store.dispatch("projects/init", {
-                  id: this.info.id,
-                });
+                this.$store.dispatch("watchs/setRefresh", true);
+                await this.$store.dispatch("projects/init");
                 this.$router.replace({
-                  name: "project",
+                  name: "home",
                 });
               } else {
                 this.$q.notify({

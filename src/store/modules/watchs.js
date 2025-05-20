@@ -2,16 +2,20 @@ import * as devalue from "devalue";
 
 const state = {
   list: [],
+  refresh: false,
 };
 
 const mutations = {
   SET_LIST: (state, list) => {
     state.list = list;
   },
+  SET_REFRESH: (state, refresh) => {
+    state.refresh = refresh;
+  },
 };
 
 const actions = {
-  setList({ dispatch, commit }, { list, options = { save: true } }) {
+  setList({ dispatch, commit, rootState }, { list, options = { save: true } }) {
     commit("SET_LIST", list);
     dispatch("projects/setUnreg", list.map((item) => item.list).flat(), {
       root: true,
@@ -34,6 +38,9 @@ const actions = {
       options: { save: true },
     });
     await dispatch("projects/init", {}, { root: true });
+  },
+  setRefresh({ commit }, refresh) {
+    commit("SET_REFRESH", refresh);
   },
 };
 
