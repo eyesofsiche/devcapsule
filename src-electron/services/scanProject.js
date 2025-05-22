@@ -43,6 +43,11 @@ export class ScanProject {
       worker.on("exit", (code) => {
         cleanup();
         if (code !== 0) {
+          if (this.abortScan) {
+            const error = new Error("스캔이 취소되었습니다.");
+            error.cancel = true;
+            reject(error);
+          }
           reject(new Error(`Worker exited with code ${code}`));
         }
       });
@@ -94,6 +99,9 @@ export class ScanProject {
         });
       } catch (err) {
         this.isRunning = false;
+        if (err.cancel) {
+          return { success: false, cancel: true };
+        }
         return { success: false, error: err.message };
       }
     }
@@ -133,6 +141,22 @@ export class ScanProject {
 
   // 수동 스캔 (자동 스캔 강제 중단 → 스캔 → 자동 재시작)
   async manualScan() {
+    if (this.isRunning) {
+      this.abortScan = true;
+      if (this.currentWorker) {
+        this.currentWorker.terminate();
+        this.currentWorker = null;
+      }
+      // 2) 이전 스캔이 완전히 멈출 때까지 대기
+      await new Promise((resolve) => {
+        const check = () => {
+          console.log("this.isRunning", this.isRunning);
+          if (!this.isRunning) return resolve();
+          setTimeout(check, 50);
+        };
+        check();
+      });
+    }
     this.stopAuto();
     const res = await this.fullScan({ type: "manual" });
     // 필요하다면 설정값을 읽어서 auto가 on 상태면 재시작

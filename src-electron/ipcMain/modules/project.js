@@ -26,13 +26,17 @@ export default function registerProjectHandlers() {
   });
 
   // 수동 새로고침
-  ipcMain.on("cmd:manual-refresh", async (event, { replyChannel }) => {
-    try {
-      const result = await scanner.manualScan();
-      event.reply(replyChannel, result);
-    } catch (err) {
-      event.reply(replyChannel, { success: false, error: err.message });
-    }
+  // ipcMain.on("cmd:manual-refresh", async (event, { replyChannel }) => {
+  //   try {
+  //     const result = await scanner.manualScan();
+  //     event.reply(replyChannel, result);
+  //   } catch (err) {
+  //     event.reply(replyChannel, { success: false, error: err.message });
+  //   }
+  // });
+  ipcMain.handle("cmd:manual-refresh", async () => {
+    const result = await scanner.manualScan();
+    return result;
   });
 
   ipcMain.on("cmd:info-project", async (event, { replyChannel, path }) => {

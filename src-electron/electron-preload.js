@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld("electron", {
   autoRefresh: (flag, type) => {
     ipcRenderer.send("cmd:change-auto-refresh", flag);
   },
+  manualRefresh: () => ipcRenderer.invoke("cmd:manual-refresh"),
 
   selectFolder: async () => {
     try {
