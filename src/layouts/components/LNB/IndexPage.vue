@@ -101,26 +101,31 @@ export default {
       }
     },
     clickRefresh() {
+      this.$store.dispatch("watchs/setRefresh", false);
       this.loadingRefresh = true;
       window.electron
-        .invokeWithReply("cmd:manual-refresh")
+        .manualRefresh()
         .then((req) => {
-          const { success, error, result } = req;
+          const { success, error, result, cancel } = req;
           if (success) {
             this.$store.dispatch("watchs/setList", {
               list: result,
               options: { save: false },
             });
-          } else {
+            this.loadingRefresh = false;
+          } else if (!cancel) {
             this.$q.notify({
               type: "negative",
               message: error,
             });
           }
         })
-        .finally(() => {
+        .catch((err) => {
           this.loadingRefresh = false;
-          this.$store.dispatch("watchs/setRefresh", false);
+          this.$q.notify({
+            type: "negative",
+            message: err,
+          });
         });
     },
   },
