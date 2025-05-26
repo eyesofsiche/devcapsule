@@ -10,15 +10,5 @@ export default boot(async ({ app, store, router }) => {
   // });
   app.config.globalProperties.$_ = _;
 
-  const settings = await window.electron.lowdb.get("settings");
-  const watchs = await window.electron.lowdb.get("watchs");
-  await store.dispatch("projects/init");
-  store.dispatch("settings/setSettings", {
-    data: settings,
-    options: { save: false },
-  });
-  store.dispatch("watchs/setList", {
-    list: watchs,
-    options: { save: false },
-  });
+  await store.dispatch("settings/init");
 });
