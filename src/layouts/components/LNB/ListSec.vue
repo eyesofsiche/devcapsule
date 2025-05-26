@@ -87,7 +87,6 @@ export default {
   },
   methods: {
     clickProject(item, index) {
-      console.log(JSON.stringify(item, 0, 2));
       this.$router.push({
         name: "project",
         query: {

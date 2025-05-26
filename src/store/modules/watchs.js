@@ -15,6 +15,13 @@ const mutations = {
 };
 
 const actions = {
+  async init({ dispatch }) {
+    const watchs = await window.electron.lowdb.get("watchs");
+    dispatch("setList", {
+      list: watchs,
+      options: { save: false },
+    });
+  },
   setList({ dispatch, commit, rootState }, { list, options = { save: true } }) {
     commit("SET_LIST", list);
     dispatch("projects/setUnreg", list.map((item) => item.list).flat(), {

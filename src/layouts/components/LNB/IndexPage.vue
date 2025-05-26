@@ -77,11 +77,11 @@ export default {
     },
     refresh: {
       handler(val) {
-        this.$nextTick(() => {
-          if (val) {
+        if (val) {
+          this.$nextTick(() => {
             this.clickRefresh();
-          }
-        });
+          });
+        }
       },
     },
   },
