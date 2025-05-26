@@ -18,6 +18,7 @@ const defaultData = {
 //     "path": "/Users/user/Documents/api",
 //     "lastSynced": null
 //     "isFileExists": true
+//     "git": "https://github.com/eyesofsiche/devcapsule.git",
 //   }
 // ]
 

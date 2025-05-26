@@ -12,18 +12,18 @@ export async function analyzeProject(projectPath) {
     version: null,
     description: null,
     license: null,
-    dependencies: [],
-    devDependencies: [],
-    engines: {},
-    hasEnv: false,
-    hasDvc: false,
-    dvcMeta: null,
-    hasGit: false,
+    // dependencies: [],
+    // devDependencies: [],
+    // engines: {},
+    // hasEnv: false,
+    // hasDvc: false,
+    // dvcMeta: null,
+    // hasGit: false,
     git: null,
     size: null,
-    scripts: {},
-    hasGitignore: false,
-    hasLockFile: false,
+    // scripts: {},
+    // hasGitignore: false,
+    // hasLockFile: false,
   };
 
   const readJson = async (filePath) => {
@@ -44,24 +44,24 @@ export async function analyzeProject(projectPath) {
       result.version = pkg.version || null;
       result.description = pkg.description || null;
       result.license = pkg.license || null;
-      result.dependencies = pkg.dependencies
-        ? Object.keys(pkg.dependencies)
-        : [];
-      result.devDependencies = pkg.devDependencies
-        ? Object.keys(pkg.devDependencies)
-        : [];
-      result.engines = pkg.engines || {};
-      result.scripts = pkg.scripts || {};
+      // result.dependencies = pkg.dependencies
+      //   ? Object.keys(pkg.dependencies)
+      //   : [];
+      // result.devDependencies = pkg.devDependencies
+      //   ? Object.keys(pkg.devDependencies)
+      //   : [];
+      // result.engines = pkg.engines || {};
+      // result.scripts = pkg.scripts || {};
     }
   }
 
   // 2. .env / .devcapsule
-  result.hasEnv = existsSync(path.join(projectPath, ".env"));
-  const dvcPath = path.join(projectPath, ".devcapsule");
-  result.hasDvc = existsSync(dvcPath);
-  if (result.hasDvc) {
-    result.dvcMeta = await readJson(dvcPath);
-  }
+  // result.hasEnv = existsSync(path.join(projectPath, ".env"));
+  // const dvcPath = path.join(projectPath, ".devcapsule");
+  // result.hasDvc = existsSync(dvcPath);
+  // if (result.hasDvc) {
+  //   result.dvcMeta = await readJson(dvcPath);
+  // }
 
   // 3. git 정보
   const gitPath = path.join(projectPath, ".git");
@@ -72,7 +72,7 @@ export async function analyzeProject(projectPath) {
       const status = await git.status();
       const log = await git.log({ n: 1 });
 
-      result.hasGit = true;
+      // result.hasGit = true;
       result.git = {
         currentBranch: status.current,
         isDirty: status.files.length > 0,
@@ -89,11 +89,11 @@ export async function analyzeProject(projectPath) {
   }
 
   // 4. 기타 파일 여부
-  result.hasGitignore = existsSync(path.join(projectPath, ".gitignore"));
-  result.hasLockFile =
-    existsSync(path.join(projectPath, "package-lock.json")) ||
-    existsSync(path.join(projectPath, "yarn.lock")) ||
-    existsSync(path.join(projectPath, "pnpm-lock.yaml"));
+  // result.hasGitignore = existsSync(path.join(projectPath, ".gitignore"));
+  // result.hasLockFile =
+  //   existsSync(path.join(projectPath, "package-lock.json")) ||
+  //   existsSync(path.join(projectPath, "yarn.lock")) ||
+  //   existsSync(path.join(projectPath, "pnpm-lock.yaml"));
 
   // 5. 폴더 사이즈
   result.size = await new Promise((resolve) => {

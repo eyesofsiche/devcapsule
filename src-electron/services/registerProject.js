@@ -30,14 +30,15 @@ export async function registerProject(folderPath, projectName = "no title") {
   // 2. ID 없는 경우 새로 생성
   if (!devcapsule.id) {
     devcapsule.id = crypto.randomUUID();
-    devcapsule.createdAt = new Date().toISOString();
-    devcapsule.registeredAt = new Date().toISOString();
   }
 
   // 3. 분석 및 캐시 갱신
   const analysis = await analyzeProject(folderPath);
+  if (analysis.success === false) {
+    throw new Error("프로젝트 분석 실패");
+  }
+  analysis.success = undefined;
   devcapsule.cache = {
-    cachedAt: new Date().toISOString(),
     ...analysis,
   };
 
@@ -47,11 +48,15 @@ export async function registerProject(folderPath, projectName = "no title") {
     "utf8"
   );
 
+  // 4. git 정보 추출
+  const git = analysis.git.remotes.find((remote) => remote.name === "origin");
+
   // 4. local DB에 등록
   await updateProject({
     id: devcapsule.id,
     name: projectName,
     folderPath,
+    git: git.url,
   });
 
   return {

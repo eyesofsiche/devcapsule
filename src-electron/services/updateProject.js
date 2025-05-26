@@ -1,6 +1,6 @@
 import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 
-export async function updateProject({ id, name, folderPath }) {
+export async function updateProject({ id, name, folderPath, git }) {
   const projectsDB = await readSection("projects");
   const alreadyExists = projectsDB.some((p) => p.id === id);
   if (!alreadyExists) {
@@ -12,6 +12,7 @@ export async function updateProject({ id, name, folderPath }) {
     path: folderPath,
     lastSynced: null,
     isFileExists: true,
+    git,
   });
 }
 
