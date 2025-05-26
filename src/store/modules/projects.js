@@ -1,4 +1,5 @@
 import * as devalue from "devalue";
+import _ from "lodash";
 
 const state = {
   list: [],
@@ -32,7 +33,7 @@ const actions = {
     }
   },
   setUnreg({ commit }, list) {
-    commit("SET_UNREG", list);
+    commit("SET_UNREG", _.orderBy(list));
   },
 };
 
