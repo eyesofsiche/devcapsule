@@ -99,7 +99,7 @@ async function createWindow() {
 app.whenReady().then(async () => {
   await initAllDB();
   await createWindow();
-  await registerAllIpcHandlers();
+  await registerAllIpcHandlers(mainWindow);
 
   const settingsDB = await readSection("settings");
   if (settingsDB.autoRefresh) {
