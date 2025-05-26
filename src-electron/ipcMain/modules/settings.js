@@ -1,5 +1,10 @@
 import { ipcMain, dialog, shell } from "electron";
 
+import {
+  excludeFolderList,
+  updateProjectFileExists,
+} from "../../services/updateProject.js";
+
 export default function registerSettingsHandlers() {
   // 탐색기
   ipcMain.handle("dialog:openDirectory", async () => {
@@ -21,9 +26,13 @@ export default function registerSettingsHandlers() {
   });
 
   // 폴더 지우기
-  ipcMain.handle("cmd:remove-folder", async (_, folderPath) => {
+  ipcMain.handle("cmd:remove-folder", async (_, { folderPath, projectId }) => {
     try {
       await shell.trashItem(folderPath);
+      if (projectId) {
+        await updateProjectFileExists(projectId);
+      }
+      await excludeFolderList(folderPath);
       return { success: true };
     } catch (err) {
       console.error("❌ open-folder error:", err);

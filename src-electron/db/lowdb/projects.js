@@ -17,6 +17,7 @@ const defaultData = {
 //     "name": "api",
 //     "path": "/Users/user/Documents/api",
 //     "lastSynced": null
+//     "isFileExists": true
 //   }
 // ]
 

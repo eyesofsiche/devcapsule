@@ -26,6 +26,7 @@ q-btn-dropdown(
         clickable
         v-ripple
         @click="clickRestoreProject"
+        :disable="info.isFileExists"
       )
         q-icon.q-mr-sm(name="mdi-archive-refresh-outline" size="20px")
         | 프로젝트 복구
@@ -41,6 +42,7 @@ q-btn-dropdown(
       clickable
       v-ripple
       @click="clickRemoveFolder"
+      :disable="!info.isFileExists && type === 'project'"
     )
       q-icon.q-mr-sm(name="mdi-package-variant-remove" size="20px")
       | 해당 폴더 삭제
@@ -171,7 +173,10 @@ export default {
           cancel: true,
         })
         .onOk(async () => {
-          const res = await window.electron.removeFolder(this.info.path);
+          const res = await window.electron.removeFolder({
+            folderPath: this.info.path,
+            projectId: this.info.id,
+          });
           if (!res.success) {
             this.$q.notify({
               type: "negative",
