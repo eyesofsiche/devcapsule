@@ -5,7 +5,7 @@ import { registerProject } from "../../services/registerProject.js";
 import { removeProject } from "../../services/removeProject.js";
 import { scanner } from "../../services/scanProject.js";
 
-export default function registerProjectHandlers() {
+export default function registerProjectHandlers(mainWindow) {
   // 자동 새로고침 설정 변경
   ipcMain.on("cmd:change-auto-refresh", async (event, flag) => {
     if (flag) {
@@ -57,13 +57,16 @@ export default function registerProjectHandlers() {
   );
 
   ipcMain.on("cmd:remove-project", async (event, { replyChannel, id }) => {
-    console.log(id);
     try {
       // 프로젝트 등록
       const result = await removeProject(id);
 
       // DB folders에서 해당 프로젝트 제거
       event.reply(replyChannel, result);
+
+      // mainWindow.webContents.send("push:update", {
+      //   type: "path",
+      // });
     } catch (err) {
       event.reply(replyChannel, { success: false });
     }

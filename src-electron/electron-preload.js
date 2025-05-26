@@ -58,6 +58,15 @@ contextBridge.exposeInMainWorld("electron", {
   removeFolder: (folderPath) =>
     ipcRenderer.invoke("cmd:remove-folder", folderPath),
 
+  onPush: (channel, listener) => {
+    // 보안을 위해 허용할 채널을 제한할 수도 있어요
+    const validChannels = ["push:update"];
+    if (!validChannels.includes(channel)) return;
+    ipcRenderer.on(channel, (_event, payload) => {
+      listener(payload);
+    });
+  },
+
   // 창 컨트롤 기능 추가
   windowControl: {
     minimize: () => ipcRenderer.send("window:minimize"),
