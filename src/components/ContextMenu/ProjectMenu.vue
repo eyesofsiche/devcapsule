@@ -141,8 +141,11 @@ export default {
             .then(async (result) => {
               const { success } = result;
               if (success) {
-                // 프로젝트 제거 후 refresh
-                this.$store.dispatch("watchs/setRefresh", true);
+                // 프로젝트 삭제 후 watchs에 추가
+                this.$store.dispatch(
+                  "watchs/setRestoreFromProjects",
+                  this.info.path
+                );
                 await this.$store.dispatch("projects/init");
                 this.$router.replace({
                   name: "home",

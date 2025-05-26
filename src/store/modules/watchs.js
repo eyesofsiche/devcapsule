@@ -22,6 +22,26 @@ const actions = {
       options: { save: false },
     });
   },
+  setRestoreFromProjects({ state, dispatch }, path) {
+    const watchEntry = state.list.find((entry) =>
+      path.startsWith(entry.path + "/")
+    );
+    if (!watchEntry) {
+      return;
+    }
+    if (!watchEntry.list.includes(path)) {
+      watchEntry.list.push(path); // 앞에 추가 (정렬 목적이면 sort 로직 추가 가능)
+      watchEntry.count = watchEntry.list.length;
+    }
+    window.electron.lowdb.set(
+      "watchs",
+      devalue.parse(devalue.stringify(watchEntry))
+    );
+    dispatch("setList", {
+      list: state.list,
+      options: { save: false },
+    });
+  },
   setList({ dispatch, commit, rootState }, { list, options = { save: true } }) {
     commit("SET_LIST", list);
     dispatch("projects/setUnreg", list.map((item) => item.list).flat(), {
