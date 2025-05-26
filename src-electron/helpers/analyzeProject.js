@@ -76,7 +76,10 @@ export async function analyzeProject(projectPath) {
       result.git = {
         currentBranch: status.current,
         isDirty: status.files.length > 0,
-        remotes: remotes.map((r) => `${r.name} (${r.refs.fetch})`),
+        remotes: remotes.map((r) => ({
+          name: r.name,
+          url: r.refs.fetch,
+        })),
         lastCommit: log.latest,
       };
     } catch {
