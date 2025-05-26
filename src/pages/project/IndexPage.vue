@@ -40,7 +40,7 @@ q-page(:class="!project ? 'flex flex-center' : ''")
               q-icon.q-mr-sm(name="mdi-git" size="20px" color="white")
               | Git 정보
             label-value(label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
-            label-value(label="remote" :value="info?.git?.remotes[0]" :width="labelWidth")
+            label-value(v-if="info?.git?.remotes.length > 0" label="remote" :value="remotes" :width="labelWidth")
             label-value(label="마지막 커밋" :value="info?.git?.lastCommit.message" :width="labelWidth")
 
           //- q-item-label(header :style="`width: ${labelWidth};`")
@@ -76,6 +76,12 @@ export default {
   },
   computed: {
     ...mapGetters(["projects"]),
+    remotes() {
+      if (!this.info?.git?.remotes) return [];
+      return this.info.git.remotes.map((remote) => {
+        return `${remote.name} (${remote.url})`;
+      });
+    },
   },
   watch: {
     $route: {
