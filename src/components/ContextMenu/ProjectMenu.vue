@@ -35,9 +35,18 @@ q-btn-dropdown(
       clickable
       v-ripple
       @click="clickAddProject"
+      :disable="!hasOriginRemote"
     )
       q-icon.q-mr-sm(name="mdi-pill" size="20px")
       | 프로젝트 등록
+      template(v-if="!hasOriginRemote")
+        q-tooltip(
+          anchor="center left"
+          self="center right"
+          :offset="[0, 0]"
+          transition-show="jump-left"
+          transition-hide="jump-right"
+        ) Git 원격 저장소(origin)가 설정된 경우에만 등록할 수 있습니다.
     q-item(
       clickable
       v-ripple
@@ -60,6 +69,11 @@ export default {
       type: String,
       enum: ["project", "watch"],
       default: "project",
+    },
+  },
+  computed: {
+    hasOriginRemote() {
+      return this.info.git?.remotes?.some((r) => r.name === "origin");
     },
   },
   methods: {
