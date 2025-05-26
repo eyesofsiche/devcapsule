@@ -11,6 +11,7 @@ export async function updateProject({ id, name, folderPath }) {
     name,
     path: folderPath,
     lastSynced: null,
+    isFileExists: true,
   });
 }
 
@@ -24,4 +25,13 @@ export async function excludeFolderList(folderPath) {
   });
 
   await writeSection("watchs", watchsDB);
+}
+
+export async function updateProjectFileExists(projectId, exists = false) {
+  const projectsDB = await readSection("projects");
+  const project = projectsDB.find((p) => p.id === projectId);
+  if (project) {
+    project.isFileExists = exists;
+  }
+  return null;
 }
