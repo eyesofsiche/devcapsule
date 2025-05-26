@@ -92,7 +92,7 @@ export default {
     clickAddProject() {
       this.$q
         .dialog({
-          title: "프로젝트 추가",
+          title: "프로젝트 등록",
           message: "정말로 해당 폴더를 등록하시겠습니까?",
           persistent: true,
           cancel: true,

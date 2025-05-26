@@ -51,7 +51,7 @@ export default function registerProjectHandlers(mainWindow) {
         // DB folders에서 해당 프로젝트 제거
         event.reply(replyChannel, result);
       } catch (err) {
-        event.reply(replyChannel, { success: false });
+        event.reply(replyChannel, { success: false, error: err.message });
       }
     }
   );

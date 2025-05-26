@@ -11,7 +11,7 @@ q-item(v-if="value !== null" clickable dense)
           div(v-for="(item, index) in value" :key="index") {{ item }}
     template(v-else)
       q-item-section(side :style="`width: ${width}; align-items: flex-end;`") {{ label }}
-      q-item-section {{ value || '-' }} {{ typeof value }}
+      q-item-section {{ value || '-' }}
 </template>
 
 <script>
