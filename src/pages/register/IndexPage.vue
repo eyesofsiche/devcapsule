@@ -32,8 +32,9 @@ q-page(:class="!path ? 'flex flex-center' : ''")
           label-value(label="버전" :value="info?.version" :width="labelWidth")
           label-value(label="설명" :value="info?.description" :width="labelWidth")
           label-value(label="라이센스" :value="info?.license" :width="labelWidth")
+          label-value(v-if="info?.envs.length > 0" label="백업대상 (.env)" :value="info?.envs" :width="labelWidth")
           label-value(label="디렉토리 크기" :value="info?.size" :width="labelWidth")
-
+          
           template(v-if="info?.git")
             q-item-label(header :style="`width: ${labelWidth};`")
               q-icon.q-mr-sm(name="mdi-git" size="20px" color="white")
@@ -114,6 +115,7 @@ export default {
         .then((result) => {
           const { success } = result;
           if (success) {
+            console.log(result);
             this.info = result;
             this.info.path = path;
             this.info.projectName =
