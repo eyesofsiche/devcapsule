@@ -43,7 +43,6 @@ export default function registerProjectHandlers(mainWindow) {
   ipcMain.on(
     "cmd:create-project",
     async (event, { replyChannel, path, name }) => {
-      console.log(path, name);
       try {
         // 프로젝트 등록
         const result = await registerProject(path, name);
