@@ -18,7 +18,7 @@ import { updateProject } from "./updateProject.js";
 export async function registerProject(folderPath, projectName = "no title") {
   const devcapsulePath = path.join(folderPath, ".devcapsule");
 
-  // 1. 기존 파일 로드 or 새로 생성
+  // 기존 파일 로드 or 새로 생성
   let devcapsule = {};
   if (existsSync(devcapsulePath)) {
     try {
@@ -30,12 +30,12 @@ export async function registerProject(folderPath, projectName = "no title") {
     }
   }
 
-  // 2. ID 없는 경우 새로 생성
+  // ID 없는 경우 새로 생성
   if (!devcapsule.id) {
     devcapsule.id = crypto.randomUUID();
   }
 
-  // 3. 분석 및 캐시 갱신
+  // 분석 및 캐시 갱신
   const analysis = await analyzeProject(folderPath);
   if (analysis.success === false) {
     throw new Error("프로젝트 분석 실패");
@@ -51,24 +51,29 @@ export async function registerProject(folderPath, projectName = "no title") {
     "utf8"
   );
 
-  // 4. git 정보 추출
+  // git 정보 추출
   const git = analysis.git.remotes.find((remote) => remote.name === "origin");
 
-  // 6. .env 파일 복사 및 md 파일 업데이트, 실패시 local DB 롤백
-  try {
-    await copyEnv(folderPath, devcapsule.id, [".env"]);
-  } catch (error) {
-    await removeSection("projects", devcapsule.id);
-    throw new Error("프로젝트 등록 중 오류 발생: " + error.message);
+  // .env 파일 복사 및 md 파일 업데이트, 실패시 local DB 롤백. env 파일이 없으면 무시
+  if (analysis.envs.length > 0) {
+    try {
+      await copyEnv(folderPath, devcapsule.id, analysis.envs);
+    } catch (error) {
+      await removeSection("projects", devcapsule.id);
+      throw new Error("프로젝트 등록 중 오류 발생: " + error.message);
+    }
   }
 
-  // 5. local DB에 등록
+  // local DB 등록
   await updateProject({
     id: devcapsule.id,
     name: projectName,
     folderPath,
     git: git.url,
+    envs: analysis.envs,
   });
+
+  // index.md 파일 업데이트
   await updateIndexMD();
 
   return {

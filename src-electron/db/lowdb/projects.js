@@ -17,8 +17,9 @@ const defaultData = {
 //     "name": "api",
 //     "path": "/Users/user/Documents/api",
 //     "lastSynced": null
-//     "isFileExists": true
+//     "isFileExists": true,  폴더 존재 여부
 //     "git": "https://github.com/eyesofsiche/devcapsule.git",
+//     "envs": [".env", ".env.local"], 백업한 .env 파일 목록
 //   }
 // ]
 
