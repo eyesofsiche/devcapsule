@@ -104,7 +104,7 @@ export default {
               name: this.info.projectName,
             })
             .then(async (result) => {
-              const { success, id } = result;
+              const { success, id, error } = result;
               if (success) {
                 await this.$store.dispatch("watchs/addProject", {
                   path: this.info.path,
@@ -118,6 +118,11 @@ export default {
                 this.$q.notify({
                   type: "positive",
                   message: "프로젝트 등록에 성공했습니다",
+                });
+              } else {
+                this.$q.notify({
+                  type: "negative",
+                  message: error,
                 });
               }
             });

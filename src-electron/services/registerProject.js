@@ -3,7 +3,10 @@ import { existsSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
+import { removeSection } from "../db/lowdb/index.js";
 import { analyzeProject } from "../helpers/analyzeProject.js";
+import { copyEnv } from "./copyEnv.js";
+import { updateIndexMD } from "./updateIndexMD.js";
 import { updateProject } from "./updateProject.js";
 
 /**
@@ -51,13 +54,22 @@ export async function registerProject(folderPath, projectName = "no title") {
   // 4. git 정보 추출
   const git = analysis.git.remotes.find((remote) => remote.name === "origin");
 
-  // 4. local DB에 등록
+  // 6. .env 파일 복사 및 md 파일 업데이트, 실패시 local DB 롤백
+  try {
+    await copyEnv(folderPath, devcapsule.id, [".env"]);
+  } catch (error) {
+    await removeSection("projects", devcapsule.id);
+    throw new Error("프로젝트 등록 중 오류 발생: " + error.message);
+  }
+
+  // 5. local DB에 등록
   await updateProject({
     id: devcapsule.id,
     name: projectName,
     folderPath,
     git: git.url,
   });
+  await updateIndexMD();
 
   return {
     success: true,
