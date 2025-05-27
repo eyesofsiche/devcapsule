@@ -1,8 +1,40 @@
 import fastFolderSize from "fast-folder-size";
+import fg from "fast-glob";
 import { existsSync, statSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import simpleGit from "simple-git";
+
+async function getEnvPatterns(folderPath) {
+  const gitignorePath = path.join(folderPath, ".gitignore");
+  if (!existsSync(gitignorePath)) {
+    return [];
+  }
+
+  const content = await fs.readFile(gitignorePath, "utf8");
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line &&
+        !line.startsWith("#") &&
+        (line === ".env" || line.startsWith(".env"))
+    );
+}
+
+async function findEnvFiles(folderPath, patterns) {
+  if (patterns.length === 0) {
+    // gitignore에 env 관련 패턴이 없으면 .env 파일은 백업하지 않음.
+    return [];
+  }
+  // fast-glob으로 실제 존재하는 파일만 가져오기
+  return fg(patterns, {
+    cwd: folderPath,
+    dot: true,
+    onlyFiles: true,
+  });
+}
 
 export async function analyzeProject(projectPath) {
   const result = {
@@ -12,18 +44,8 @@ export async function analyzeProject(projectPath) {
     version: null,
     description: null,
     license: null,
-    // dependencies: [],
-    // devDependencies: [],
-    // engines: {},
-    // hasEnv: false,
-    // hasDvc: false,
-    // dvcMeta: null,
-    // hasGit: false,
     git: null,
     size: null,
-    // scripts: {},
-    // hasGitignore: false,
-    // hasLockFile: false,
   };
 
   const readJson = async (filePath) => {
@@ -35,7 +57,12 @@ export async function analyzeProject(projectPath) {
     }
   };
 
-  // 1. package.json
+  // 백업할 .env 파일 찾기
+  const envPatterns = await getEnvPatterns(projectPath);
+  const envFiles = await findEnvFiles(projectPath, envPatterns);
+  result.envs = envFiles;
+
+  // package 정보
   const pkgPath = path.join(projectPath, "package.json");
   if (existsSync(pkgPath)) {
     const pkg = await readJson(pkgPath);
@@ -44,26 +71,10 @@ export async function analyzeProject(projectPath) {
       result.version = pkg.version || null;
       result.description = pkg.description || null;
       result.license = pkg.license || null;
-      // result.dependencies = pkg.dependencies
-      //   ? Object.keys(pkg.dependencies)
-      //   : [];
-      // result.devDependencies = pkg.devDependencies
-      //   ? Object.keys(pkg.devDependencies)
-      //   : [];
-      // result.engines = pkg.engines || {};
-      // result.scripts = pkg.scripts || {};
     }
   }
 
-  // 2. .env / .devcapsule
-  // result.hasEnv = existsSync(path.join(projectPath, ".env"));
-  // const dvcPath = path.join(projectPath, ".devcapsule");
-  // result.hasDvc = existsSync(dvcPath);
-  // if (result.hasDvc) {
-  //   result.dvcMeta = await readJson(dvcPath);
-  // }
-
-  // 3. git 정보
+  // git 정보
   const gitPath = path.join(projectPath, ".git");
   if (existsSync(gitPath)) {
     try {
@@ -83,19 +94,11 @@ export async function analyzeProject(projectPath) {
         lastCommit: log.latest,
       };
     } catch {
-      // git이 초기화는 되어있지만 내부 구조가 망가졌을 수도 있음
       result.git = null;
     }
   }
 
-  // 4. 기타 파일 여부
-  // result.hasGitignore = existsSync(path.join(projectPath, ".gitignore"));
-  // result.hasLockFile =
-  //   existsSync(path.join(projectPath, "package-lock.json")) ||
-  //   existsSync(path.join(projectPath, "yarn.lock")) ||
-  //   existsSync(path.join(projectPath, "pnpm-lock.yaml"));
-
-  // 5. 폴더 사이즈
+  // 용량 체크
   result.size = await new Promise((resolve) => {
     fastFolderSize(projectPath, (err, bytes) => {
       if (err) resolve(null);
