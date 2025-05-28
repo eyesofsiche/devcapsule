@@ -46,8 +46,6 @@ export default function registerProjectHandlers(mainWindow) {
       try {
         // 프로젝트 등록
         const result = await registerProject(path, name);
-
-        // DB folders에서 해당 프로젝트 제거
         event.reply(replyChannel, result);
       } catch (err) {
         event.reply(replyChannel, { success: false, error: err.message });
@@ -60,12 +58,7 @@ export default function registerProjectHandlers(mainWindow) {
       // 프로젝트 등록
       const result = await removeProject(id);
 
-      // DB folders에서 해당 프로젝트 제거
       event.reply(replyChannel, result);
-
-      // mainWindow.webContents.send("push:update", {
-      //   type: "path",
-      // });
     } catch (err) {
       event.reply(replyChannel, { success: false });
     }

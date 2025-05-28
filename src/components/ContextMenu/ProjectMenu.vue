@@ -187,25 +187,53 @@ export default {
 
     // 해당 폴더 삭제
     async clickRemoveFolder() {
-      this.$q
-        .dialog({
-          title: "폴더 삭제",
-          message: "정말로 해당 폴더를 삭제하시겠습니까?",
-          persistent: true,
-          cancel: true,
-        })
-        .onOk(async () => {
-          const res = await window.electron.removeFolder({
-            folderPath: this.info.path,
-            projectId: this.info.id,
-          });
-          if (!res.success) {
-            this.$q.notify({
-              type: "negative",
-              message: "폴더 삭제에 실패했습니다",
-            });
+      const check = await window.electron.invokeWithReply(
+        "cmd:remove-folder-checker",
+        {
+          path: this.info.path,
+        }
+      );
+      let message = "정말로 해당 프로젝트 폴더를 제거하시겠습니까?";
+      if (check.hasUncommittedChanges || check.hasUnpushedCommits) {
+        message = `
+          ⚠️ <strong style="color: #e53935;">주의가 필요합니다!</strong><br><br>
+
+          이 프로젝트에는 <span style="color: #fb8c00;">저장되지 않은 변경사항</span>이 존재합니다.<br><br>
+
+          ${
+            check.hasUncommittedChanges
+              ? '📝 <span style="color: #fdd835;">커밋되지 않은 파일이 존재합니다.</span><br>'
+              : ""
           }
+          ${
+            check.hasUnpushedCommits
+              ? '🚀 <span style="color: #4fc3f7;">푸시되지 않은 커밋이 존재합니다.</span><br>'
+              : ""
+          }
+
+          <br>지금 폴더를 삭제하면 해당 내용은 복구할 수 없습니다.<br>
+          그래도 삭제하시겠습니까?
+        `;
+      }
+      const confirm = {
+        title: "폴더 삭제",
+        message,
+        html: true,
+        persistent: true,
+        cancel: true,
+      };
+      this.$q.dialog(confirm).onOk(async () => {
+        const res = await window.electron.removeFolder({
+          folderPath: this.info.path,
+          projectId: this.info.id,
         });
+        if (!res.success) {
+          this.$q.notify({
+            type: "negative",
+            message: "폴더 삭제에 실패했습니다",
+          });
+        }
+      });
     },
   },
 };

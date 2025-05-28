@@ -1,5 +1,6 @@
 import { ipcMain, dialog, shell } from "electron";
 
+import { checkUncommittedChanges } from "../../helpers/git.js";
 import {
   excludeFolderList,
   updateProjectFileExists,
@@ -26,6 +27,18 @@ export default function registerSettingsHandlers() {
   });
 
   // 폴더 지우기
+  ipcMain.on(
+    "cmd:remove-folder-checker",
+    async (event, { replyChannel, path }) => {
+      try {
+        // git 체크
+        const result = await checkUncommittedChanges(path);
+        event.reply(replyChannel, result);
+      } catch (err) {
+        event.reply(replyChannel, { success: false });
+      }
+    }
+  );
   ipcMain.handle("cmd:remove-folder", async (_, { folderPath, projectId }) => {
     try {
       await shell.trashItem(folderPath);
