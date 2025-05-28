@@ -85,12 +85,12 @@ export default {
   },
   watch: {
     $route: {
-      handler(to, from) {
-        if (to.query.index === undefined) {
+      handler(to) {
+        if (to.query.path === undefined) {
           this.path = null;
           return;
         }
-        this.path = this.projects.unreg[to.query.index];
+        this.path = to.query.path;
         this.fetchProject(this.path);
       },
       immediate: true,
