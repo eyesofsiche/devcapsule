@@ -8,6 +8,7 @@ q-btn-dropdown(
 )
   q-list
     q-item(
+      v-if="type === 'watch'"
       clickable
       v-ripple
       @click="clickOpenFinder"
