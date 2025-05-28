@@ -28,7 +28,7 @@ q-page(:class="!project ? 'flex flex-center' : ''")
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
             | 기본정보
-          label-value(label="경로" :value="info?.path" :width="labelWidth")
+          label-value(label="경로" :value="project?.path" :width="labelWidth")
           label-value(label="이름" :value="info?.name" :width="labelWidth")
           label-value(label="버전" :value="info?.version" :width="labelWidth")
           label-value(label="설명" :value="info?.description" :width="labelWidth")

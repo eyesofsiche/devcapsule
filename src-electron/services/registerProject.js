@@ -40,9 +40,10 @@ export async function registerProject(folderPath, projectName = "no title") {
   if (analysis.success === false) {
     throw new Error("프로젝트 분석 실패");
   }
-  analysis.success = undefined;
   devcapsule.cache = {
     ...analysis,
+    success: undefined, // 포함하지 않음
+    path: undefined, // 포함하지 않음
   };
 
   await fs.writeFile(
