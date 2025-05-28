@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { ipcMain, dialog, shell } from "electron";
+import fs from "fs";
 import os from "os";
 
 import { checkUncommittedChanges } from "../../helpers/git.js";
@@ -20,7 +21,11 @@ export default function registerSettingsHandlers() {
   // Finder/탐색기에서 폴더 열기
   ipcMain.handle("cmd:open-folder", async (_, folderPath) => {
     try {
-      await shell.openPath(folderPath);
+      const result = await shell.openPath(folderPath);
+      if (result) {
+        console.error("❌ open-folder error:", result);
+        return { success: false, error: result };
+      }
       return { success: true };
     } catch (err) {
       console.error("❌ open-folder error:", err);
@@ -29,35 +34,51 @@ export default function registerSettingsHandlers() {
   });
 
   ipcMain.handle("cmd:open-vscode", async (_, folderPath) => {
-    try {
-      // macOS/Linux/Windows 모두 'code' 명령어 사용
-      exec(`code "${folderPath}"`);
-      return { success: true };
-    } catch (err) {
-      console.error("❌ open-vscode error:", err);
-      return { success: false, error: err.message };
-    }
+    return new Promise((resolve) => {
+      // 폴더 존재 여부 확인
+      fs.stat(folderPath, (err, stats) => {
+        if (err || !stats.isDirectory()) {
+          const message = `존재하지 않는 폴더입니다: ${folderPath}`;
+          console.error("❌ open-vscode error:", message);
+          resolve({ success: false, error: message });
+          return;
+        }
+
+        // 폴더가 있을 경우 VSCode 실행
+        exec(`code "${folderPath}"`, (error, stdout, stderr) => {
+          if (error) {
+            console.error("❌ open-vscode error:", error.message);
+            resolve({ success: false, error: error.message });
+          } else {
+            resolve({ success: true });
+          }
+        });
+      });
+    });
   });
 
   ipcMain.handle("cmd:open-terminal", async (_, folderPath) => {
-    try {
-      const platform = os.platform();
+    const platform = os.platform();
+    let command = "";
 
-      let command = "";
-      if (platform === "darwin") {
-        command = `open -a Terminal "${folderPath}"`;
-      } else if (platform === "win32") {
-        command = `start cmd.exe /K "cd /d ${folderPath}"`;
-      } else if (platform === "linux") {
-        command = `gnome-terminal --working-directory="${folderPath}"`;
-      }
-
-      exec(command);
-      return { success: true };
-    } catch (err) {
-      console.error("❌ open-terminal error:", err);
-      return { success: false, error: err.message };
+    if (platform === "darwin") {
+      command = `open -a Terminal "${folderPath}"`;
+    } else if (platform === "win32") {
+      command = `start cmd.exe /K "cd /d ${folderPath}"`;
+    } else if (platform === "linux") {
+      command = `gnome-terminal --working-directory="${folderPath}"`;
     }
+
+    return new Promise((resolve) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error("❌ open-terminal error:", error.message);
+          resolve({ success: false, error: error.message });
+        } else {
+          resolve({ success: true });
+        }
+      });
+    });
   });
 
   // 폴더 지우기
