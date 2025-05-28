@@ -2,13 +2,21 @@
 .text-caption.no-project(v-if="projects?.unreg.length < 1")
   q-icon(name="info" size="25px" color="white")
   | 프로젝트가 존재하지 않습니다.
-template(v-else)
-  q-virtual-scroll(
-    ref="virtScroll"
-    :items="list"
-    v-slot="{ item, index }"
-    scroll-target="#scroll-lbn-area > .scroll"
-  )
+q-virtual-scroll(
+  v-else
+  ref="virtScroll"
+  :items="list"
+  scroll-target="#scroll-lbn-area > .scroll"
+)
+  template(v-slot:before)
+    .sticky
+      q-item.q-pa-none
+        q-item-section
+          q-input(v-model="keyword" dense)
+            template(v-slot:append)
+              q-icon(v-if="keyword !== ''" name="close" @click="keyword = ''" class="cursor-pointer")
+              q-icon(v-else name="search")
+  template(v-slot="{ item, index }")
     q-item.q-pa-none(:key="index")
       q-item-section
         q-btn.full-width(
@@ -33,6 +41,14 @@ export default {
   name: "UnRegisteredList",
   computed: {
     ...mapGetters(["projects"]),
+    list() {
+      if (this.keyword) {
+        return this.projects.unreg.filter((item) =>
+          item.toLowerCase().includes(this.keyword.toLowerCase())
+        );
+      }
+      return this.projects.unreg;
+    },
   },
   watch: {
     $route: {
@@ -52,17 +68,11 @@ export default {
       },
       immediate: true,
     },
-    projects: {
-      handler() {
-        this.list = this.projects.unreg;
-      },
-      immediate: true,
-    },
   },
   data() {
     return {
-      list: [],
       active: null,
+      keyword: "",
     };
   },
   methods: {
@@ -117,5 +127,11 @@ export default {
       // display: block;
     }
   }
+}
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #2d2d2d;
 }
 </style>

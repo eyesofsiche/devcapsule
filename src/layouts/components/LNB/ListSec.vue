@@ -10,24 +10,32 @@ q-scroll-area.scroll#scroll-lbn-area
         q-virtual-scroll(
           ref="virtScroll"
           :items="list"
-          v-slot="{ item, index }"
           scroll-target="#scroll-lbn-area > .scroll"
         )
-          q-item.q-pa-none(:key="index")
-            q-item-section
-              q-btn.full-width(
-                :ref="`btn-${index}`"
-                align="left"
-                :color="index !== active ? '201F27' : 'blue-grey-9'"
-                :flat="index !== active"
-                dense
-                no-caps
-                @click="clickProject(item, index)"
-                @keydown.up.prevent="focusPrev(index)"
-                @keydown.down.prevent="focusNext(index)"
-              )
-                q-icon(name="play_for_work" size="20px" color="white")
-                span.label {{ item.name }}
+          template(v-slot:before)
+            .sticky
+              q-item.q-pa-none
+                q-item-section
+                  q-input(v-model="keyword" dense)
+                    template(v-slot:append)
+                      q-icon(v-if="keyword !== ''" name="close" @click="keyword = ''" class="cursor-pointer")
+                      q-icon(v-else name="search")
+          template(v-slot="{ item, index }")
+            q-item.q-pa-none(:key="index")
+              q-item-section
+                q-btn.full-width(
+                  :ref="`btn-${index}`"
+                  align="left"
+                  :color="index !== active ? '201F27' : 'blue-grey-9'"
+                  :flat="index !== active"
+                  dense
+                  no-caps
+                  @click="clickProject(item, index)"
+                  @keydown.up.prevent="focusPrev(index)"
+                  @keydown.down.prevent="focusNext(index)"
+                )
+                  q-icon(name="play_for_work" size="20px" color="white")
+                  span.label {{ item.name }}
   unreg-list(v-else)
 </template>
 
@@ -48,6 +56,16 @@ export default {
   },
   computed: {
     ...mapGetters(["watchs", "projects"]),
+    list() {
+      if (this.keyword) {
+        return this.projects.list.filter(
+          (item) =>
+            item.name.toLowerCase().includes(this.keyword.toLowerCase()) ||
+            item.path.toLowerCase().includes(this.keyword.toLowerCase())
+        );
+      }
+      return this.projects.list;
+    },
   },
   watch: {
     $route: {
@@ -81,8 +99,8 @@ export default {
   },
   data() {
     return {
-      list: [],
       active: -1,
+      keyword: "",
     };
   },
   methods: {
@@ -121,6 +139,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.q-item.q-pa-none {
+  padding: 0 8px;
+}
 .scroll {
   height: calc(100vh - 102px);
   :deep(.q-scrollarea__content) {
@@ -137,5 +158,11 @@ export default {
     display: block;
     margin: 0 auto 10px;
   }
+}
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #2d2d2d;
 }
 </style>
