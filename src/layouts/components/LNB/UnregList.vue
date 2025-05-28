@@ -81,6 +81,7 @@ export default {
         name: "register",
         query: {
           index,
+          path: item,
         },
       });
     },
