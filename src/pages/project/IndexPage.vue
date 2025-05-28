@@ -18,6 +18,8 @@ q-page(:class="!project ? 'flex flex-center' : ''")
           flat-input.text-h6.col(
             v-model="projectName"
             outlined
+            @blur="changeProjectName"
+            @keyup.native.enter="event => event.target?.blur()"
           )
           project-menu(
             type="project"
@@ -29,7 +31,6 @@ q-page(:class="!project ? 'flex flex-center' : ''")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
             | 기본정보
           label-value(label="경로" :value="project?.path" :width="labelWidth")
-          label-value(label="이름" :value="info?.name" :width="labelWidth")
           label-value(label="버전" :value="info?.version" :width="labelWidth")
           label-value(label="설명" :value="info?.description" :width="labelWidth")
           label-value(label="라이센스" :value="info?.license" :width="labelWidth")
@@ -62,12 +63,6 @@ import ProjectMenu from "@/components/ContextMenu/ProjectMenu.vue";
 import FlatInput from "@/components/Form/FlatInput.vue";
 import LabelValue from "@/components/Form/LabelValue.vue";
 
-const defaultInfo = {
-  id: "",
-  name: "",
-  path: "",
-};
-
 export default {
   name: "RegisterPage",
   components: {
@@ -83,17 +78,19 @@ export default {
         return `${remote.name} (${remote.url})`;
       });
     },
+    project() {
+      if (!this.id) return null;
+      return this.projects.list.find((item) => item.id === this.id);
+    },
   },
   watch: {
     $route: {
       handler(to, from) {
-        if (to.query.id === undefined) {
-          this.path = null;
+        if (!to.query.id) {
+          this.id = null;
           return;
         }
-        this.project = this.projects.list.find(
-          (item) => item.id === to.query.id
-        );
+        this.id = to.query.id;
         this.fetchProject();
       },
       immediate: true,
@@ -102,11 +99,10 @@ export default {
   mounted() {},
   data() {
     return {
+      id: null,
       labelWidth: "130px",
-      projectName: "",
-      project: this.$_.cloneDeep(defaultInfo),
-      path: null,
       info: null,
+      projectName: "",
     };
   },
   methods: {
@@ -121,6 +117,37 @@ export default {
           const { success } = result;
           if (success) {
             this.info = result;
+            this.projectName = this.project.name;
+          }
+        });
+    },
+    changeProjectName() {
+      if (this.projectName === this.project.name) return;
+      if (this.projectName === "") {
+        this.$q.notify({
+          type: "negative",
+          message: "프로젝트 이름은 비워둘 수 없습니다.",
+        });
+        this.projectName = this.project.name;
+        return;
+      }
+      window.electron
+        .invokeWithReply("cmd:update-project-name", {
+          id: this.project.id,
+          name: this.projectName,
+        })
+        .then((result) => {
+          const { success, error } = result;
+          if (success) {
+            this.$store.dispatch("projects/setProjectName", {
+              id: this.project.id,
+              name: this.projectName,
+            });
+          } else {
+            this.$q.notify({
+              type: "negative",
+              message: error || "프로젝트 이름 변경에 실패했습니다.",
+            });
             this.projectName = this.project.name;
           }
         });

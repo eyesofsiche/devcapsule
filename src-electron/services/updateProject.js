@@ -1,19 +1,26 @@
 import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 
 export async function updateProject({ id, name, folderPath, git, envs }) {
+  if (!id) {
+    throw new Error("Project id is required.");
+  }
   const projectsDB = await readSection("projects");
-  const alreadyExists = projectsDB.some((p) => p.id === id);
-  if (!alreadyExists) {
+  const existingProject = projectsDB.find((p) => p.id === id);
+  if (!existingProject) {
+    if (!folderPath) {
+      throw new Error("folderPath is required for new projects.");
+    }
     await excludeFolderList(folderPath);
   }
+
   await updateSection("projects", {
     id,
-    name,
-    path: folderPath,
+    name: name ?? existingProject?.name ?? "no title",
+    path: folderPath ?? existingProject?.path ?? "",
     lastSynced: new Date().toISOString(),
-    isFileExists: true,
-    git,
-    envs,
+    isFileExists: existingProject?.isFileExists ?? true,
+    git: git ?? existingProject?.git ?? "",
+    envs: envs ?? existingProject?.envs ?? [],
   });
 }
 
