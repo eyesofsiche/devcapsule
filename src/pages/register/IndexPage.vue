@@ -17,6 +17,7 @@ q-page(:class="!path ? 'flex flex-center' : ''")
           flat-input.text-h6.col(
             v-model="info.projectName"
             outlined
+            readonly
           )
           project-menu(
             type="watch"
