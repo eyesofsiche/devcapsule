@@ -26,11 +26,34 @@ q-page(:class="!project ? 'flex flex-center' : ''")
             :info="project"
           )
 
+        .action-btns.row.q-gutter-sm.justify-end
+          q-btn(
+            icon="mdi-apple-finder"
+            color="blue-grey-4"
+            round
+            dense
+            @click="clickOpenFinder"
+          )
+          q-btn(
+            icon="mdi-console-line"
+            color="grey-8"
+            round
+            dense
+            @click="clickOpenTerminal"
+          )
+          q-btn(
+            icon="mdi-microsoft-visual-studio-code"
+            color="primary"
+            round
+            dense
+            @click="clickOpenVSCode"
+          )
         q-list
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
             | 기본정보
           label-value(label="경로" :value="project?.path" :width="labelWidth")
+          label-value(label="이름" :value="info?.name" :width="labelWidth")
           label-value(label="버전" :value="info?.version" :width="labelWidth")
           label-value(label="설명" :value="info?.description" :width="labelWidth")
           label-value(label="라이센스" :value="info?.license" :width="labelWidth")
@@ -151,6 +174,34 @@ export default {
             this.projectName = this.project.name;
           }
         });
+    },
+
+    async clickOpenFinder() {
+      const res = await window.electron.openFolder(this.info.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: "폴더 열기에 실패했습니다",
+        });
+      }
+    },
+    async clickOpenVSCode() {
+      const res = await window.electron.openVSCode(this.info.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: "VSCode 열기에 실패했습니다",
+        });
+      }
+    },
+    async clickOpenTerminal() {
+      const res = await window.electron.openTerminal(this.info.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: "터미널 열기에 실패했습니다",
+        });
+      }
     },
   },
 };

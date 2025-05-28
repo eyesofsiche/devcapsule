@@ -55,6 +55,9 @@ contextBridge.exposeInMainWorld("electron", {
     }
   },
   openFolder: (folderPath) => ipcRenderer.invoke("cmd:open-folder", folderPath),
+  openVSCode: (folderPath) => ipcRenderer.invoke("cmd:open-vscode", folderPath),
+  openTerminal: (folderPath) =>
+    ipcRenderer.invoke("cmd:open-terminal", folderPath),
   removeFolder: (folderPath) =>
     ipcRenderer.invoke("cmd:remove-folder", folderPath),
 

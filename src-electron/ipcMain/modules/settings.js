@@ -1,4 +1,6 @@
+import { exec } from "child_process";
 import { ipcMain, dialog, shell } from "electron";
+import os from "os";
 
 import { checkUncommittedChanges } from "../../helpers/git.js";
 import {
@@ -22,6 +24,38 @@ export default function registerSettingsHandlers() {
       return { success: true };
     } catch (err) {
       console.error("❌ open-folder error:", err);
+      return { success: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle("cmd:open-vscode", async (_, folderPath) => {
+    try {
+      // macOS/Linux/Windows 모두 'code' 명령어 사용
+      exec(`code "${folderPath}"`);
+      return { success: true };
+    } catch (err) {
+      console.error("❌ open-vscode error:", err);
+      return { success: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle("cmd:open-terminal", async (_, folderPath) => {
+    try {
+      const platform = os.platform();
+
+      let command = "";
+      if (platform === "darwin") {
+        command = `open -a Terminal "${folderPath}"`;
+      } else if (platform === "win32") {
+        command = `start cmd.exe /K "cd /d ${folderPath}"`;
+      } else if (platform === "linux") {
+        command = `gnome-terminal --working-directory="${folderPath}"`;
+      }
+
+      exec(command);
+      return { success: true };
+    } catch (err) {
+      console.error("❌ open-terminal error:", err);
       return { success: false, error: err.message };
     }
   });
