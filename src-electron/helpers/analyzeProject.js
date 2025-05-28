@@ -3,7 +3,8 @@ import fg from "fast-glob";
 import { existsSync, statSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
-import simpleGit from "simple-git";
+
+import { getGitInfo } from "../helpers/git.js";
 
 async function getEnvPatterns(folderPath) {
   const gitignorePath = path.join(folderPath, ".gitignore");
@@ -75,28 +76,7 @@ export async function analyzeProject(projectPath) {
   }
 
   // git 정보
-  const gitPath = path.join(projectPath, ".git");
-  if (existsSync(gitPath)) {
-    try {
-      const git = simpleGit({ baseDir: projectPath });
-      const remotes = await git.getRemotes(true);
-      const status = await git.status();
-      const log = await git.log({ n: 1 });
-
-      // result.hasGit = true;
-      result.git = {
-        currentBranch: status.current,
-        isDirty: status.files.length > 0,
-        remotes: remotes.map((r) => ({
-          name: r.name,
-          url: r.refs.fetch,
-        })),
-        lastCommit: log.latest,
-      };
-    } catch {
-      result.git = null;
-    }
-  }
+  result.git = await getGitInfo(projectPath);
 
   // 용량 체크
   result.size = await new Promise((resolve) => {
