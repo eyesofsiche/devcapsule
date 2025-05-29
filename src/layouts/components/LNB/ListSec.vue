@@ -34,7 +34,8 @@ q-scroll-area.scroll#scroll-lbn-area
                   @keydown.up.prevent="focusPrev(index)"
                   @keydown.down.prevent="focusNext(index)"
                 )
-                  q-icon(name="play_for_work" size="20px" color="white")
+                  q-icon(v-if="item.isFileExists" name="check_circle" size="20px" color="white")
+                  q-icon(v-else name="mdi-link-variant-off" size="20px" color="white")
                   span.label {{ item.name }}
   unreg-list(v-else)
 </template>
