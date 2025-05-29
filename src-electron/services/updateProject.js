@@ -42,5 +42,8 @@ export async function updateProjectFileExists(projectId, exists = false) {
   if (project) {
     project.isFileExists = exists;
   }
+  await updateSection("projects", {
+    ...project,
+  });
   return null;
 }

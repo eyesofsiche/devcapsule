@@ -4,6 +4,7 @@ import simpleGit from "simple-git";
 
 import { readSection } from "../db/lowdb/index.js";
 import { getUserDataPath } from "../utils/userData.js";
+import { updateProjectFileExists } from "./updateProject.js";
 
 export async function restoreProject(projectId) {
   try {
@@ -47,6 +48,9 @@ export async function restoreProject(projectId) {
         failed.push(envFile);
       }
     }
+
+    // watch 제외 폴더 설정
+    await updateProjectFileExists(projectId, true);
 
     return { success: true, restored, failed };
   } catch (err) {

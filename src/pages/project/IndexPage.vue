@@ -24,18 +24,20 @@ q-page(:class="!project ? 'flex flex-center' : ''")
           project-menu(
             type="project"
             :info="project"
+            @complete:remove-folder="fetchProject"
           )
 
         .action-btns.row.justify-between
           .col.q-gutter-sm
             q-btn(
+              v-if="!project?.isFileExists"
               icon="mdi-backup-restore"
               color="light-green"
               round
               dense
               @click="clickRestore"
             )
-          .col.flex.q-gutter-sm.justify-end
+          .col.flex.q-gutter-sm.justify-end(v-if="project?.isFileExists")
             q-btn(
               icon="mdi-apple-finder"
               color="blue-grey-4"
@@ -197,23 +199,27 @@ export default {
           this.$q.loading.show({
             message: "프로젝트 복원 중...",
           });
-          console.log(JSON.stringify(this.project, null, 2));
-          window.electron.restoreProject(this.project.id).then((result) => {
-            const { success, error } = result;
-            if (success) {
-              this.$q.notify({
-                type: "positive",
-                message: "프로젝트가 복원되었습니다.",
-              });
+          window.electron
+            .restoreProject(this.project.id)
+            .then((result) => {
+              const { success, error } = result;
+              if (success) {
+                this.$q.notify({
+                  type: "positive",
+                  message: "프로젝트가 복원되었습니다.",
+                });
+                this.fetchProject();
+              } else {
+                this.$q.notify({
+                  type: "negative",
+                  message: error || "프로젝트 복원에 실패했습니다.",
+                });
+              }
+            })
+            .finally(() => {
+              this.$store.dispatch("settings/setAllPath");
               this.$q.loading.hide();
-              this.fetchProject();
-            } else {
-              this.$q.notify({
-                type: "negative",
-                message: error || "프로젝트 복원에 실패했습니다.",
-              });
-            }
-          });
+            });
         });
     },
     async clickOpenFinder() {
