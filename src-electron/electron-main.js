@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 
 import { initAllDB, readSection } from "./db/lowdb/index.js";
+import { prepareGitAuthScript } from "./helpers/git.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
 import { scanner } from "./services/scanProject.js";
 
@@ -98,6 +99,7 @@ async function createWindow() {
 
 app.whenReady().then(async () => {
   await initAllDB();
+  await prepareGitAuthScript();
   await createWindow();
   await registerAllIpcHandlers(mainWindow);
 
