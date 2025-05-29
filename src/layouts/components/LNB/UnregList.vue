@@ -30,7 +30,7 @@ q-virtual-scroll(
           @keydown.up.prevent="focusPrev(index)"
           @keydown.down.prevent="focusNext(index)"
         )
-          q-icon(name="play_for_work" size="20px" color="white")
+          q-icon(name="mdi-folder-open-outline" size="20px" color="white")
           span.label {{ item }}
 </template>
 
