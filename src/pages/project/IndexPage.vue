@@ -26,28 +26,37 @@ q-page(:class="!project ? 'flex flex-center' : ''")
             :info="project"
           )
 
-        .action-btns.row.q-gutter-sm.justify-end
-          q-btn(
-            icon="mdi-apple-finder"
-            color="blue-grey-4"
-            round
-            dense
-            @click="clickOpenFinder"
-          )
-          q-btn(
-            icon="mdi-console-line"
-            color="grey-8"
-            round
-            dense
-            @click="clickOpenTerminal"
-          )
-          q-btn(
-            icon="mdi-microsoft-visual-studio-code"
-            color="primary"
-            round
-            dense
-            @click="clickOpenVSCode"
-          )
+        .action-btns.row.justify-between
+          .col.q-gutter-sm
+            q-btn(
+              icon="mdi-backup-restore"
+              color="light-green"
+              round
+              dense
+              @click="clickRestore"
+            )
+          .col.flex.q-gutter-sm.justify-end
+            q-btn(
+              icon="mdi-apple-finder"
+              color="blue-grey-4"
+              round
+              dense
+              @click="clickOpenFinder"
+            )
+            q-btn(
+              icon="mdi-console-line"
+              color="grey-8"
+              round
+              dense
+              @click="clickOpenTerminal"
+            )
+            q-btn(
+              icon="mdi-microsoft-visual-studio-code"
+              color="primary"
+              round
+              dense
+              @click="clickOpenVSCode"
+            )
         q-list
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
@@ -176,6 +185,37 @@ export default {
         });
     },
 
+    clickRestore() {
+      this.$q
+        .dialog({
+          title: "프로젝트 복원",
+          message: "프로젝트를 복원하시겠습니까?",
+          cancel: true,
+          persistent: true,
+        })
+        .onOk(() => {
+          this.$q.loading.show({
+            message: "프로젝트 복원 중...",
+          });
+          console.log(JSON.stringify(this.project, null, 2));
+          window.electron.restoreProject(this.project.id).then((result) => {
+            const { success, error } = result;
+            if (success) {
+              this.$q.notify({
+                type: "positive",
+                message: "프로젝트가 복원되었습니다.",
+              });
+              this.$q.loading.hide();
+              this.fetchProject();
+            } else {
+              this.$q.notify({
+                type: "negative",
+                message: error || "프로젝트 복원에 실패했습니다.",
+              });
+            }
+          });
+        });
+    },
     async clickOpenFinder() {
       const res = await window.electron.openFolder(this.info.path);
       if (!res.success) {

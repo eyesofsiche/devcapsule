@@ -1,6 +1,33 @@
 import { existsSync } from "fs";
+import fs from "fs/promises";
+import os from "os";
 import path from "path";
 import simpleGit from "simple-git";
+
+import { getUserDataPath } from "../utils/userData.js";
+
+export async function prepareGitAuthScript() {
+  const authScriptDir = path.join(getUserDataPath(), "git-auth");
+  await fs.mkdir(authScriptDir, { recursive: true });
+
+  const platform = os.platform();
+
+  if (platform === "win32") {
+    const bat = `@echo off
+echo GitHub 인증을 시작합니다...
+gh auth login
+pause`;
+    await fs.writeFile(path.join(authScriptDir, "auth-github.bat"), bat);
+  } else {
+    const sh = `#!/bin/bash
+echo "GitHub 인증을 시작합니다..."
+gh auth login
+read -p "엔터를 눌러 종료합니다..."`;
+    const filePath = path.join(authScriptDir, "auth-github.sh");
+    await fs.writeFile(filePath, sh);
+    await fs.chmod(filePath, 0o755); // 실행 권한 부여
+  }
+}
 
 export async function getGitInfo(folderPath) {
   const gitPath = path.join(folderPath, ".git");
@@ -47,4 +74,17 @@ export async function checkUncommittedChanges(folderPath) {
     console.error("커밋 상태 확인 실패:", err);
     return null;
   }
+}
+
+export async function checkGitAccess(gitUrl) {
+  return new Promise((resolve) => {
+    exec(`git ls-remote ${gitUrl}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error("❌ Git 인증 체크 실패:", stderr.trim());
+        resolve({ success: false, error: stderr.trim() || error.message });
+      } else {
+        resolve({ success: true });
+      }
+    });
+  });
 }

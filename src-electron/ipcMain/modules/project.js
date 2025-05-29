@@ -3,6 +3,7 @@ import { ipcMain } from "electron";
 import { analyzeProject } from "../../helpers/analyzeProject.js";
 import { registerProject } from "../../services/registerProject.js";
 import { removeProject } from "../../services/removeProject.js";
+import { restoreProject } from "../../services/restoreProject.js";
 import { scanner } from "../../services/scanProject.js";
 import { updateProject } from "../../services/updateProject.js";
 
@@ -73,5 +74,9 @@ export default function registerProjectHandlers(mainWindow) {
     } catch (err) {
       event.reply(replyChannel, { success: false });
     }
+  });
+
+  ipcMain.handle("cmd:restore-project", async (_, projectId) => {
+    return await restoreProject(projectId);
   });
 }

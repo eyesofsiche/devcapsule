@@ -60,6 +60,8 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.invoke("cmd:open-terminal", folderPath),
   removeFolder: (folderPath) =>
     ipcRenderer.invoke("cmd:remove-folder", folderPath),
+  restoreProject: (projectId) =>
+    ipcRenderer.invoke("cmd:restore-project", projectId),
 
   onPush: (channel, listener) => {
     // 보안을 위해 허용할 채널을 제한할 수도 있어요
