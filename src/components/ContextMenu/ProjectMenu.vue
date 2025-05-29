@@ -223,17 +223,35 @@ export default {
         persistent: true,
         cancel: true,
       };
+      // console.log(JSON.stringify(this.info, null, 2));
       this.$q.dialog(confirm).onOk(async () => {
-        const res = await window.electron.removeFolder({
-          folderPath: this.info.path,
-          projectId: this.info.id,
+        this.$q.loading.show({
+          message: "폴더 삭제 중...",
         });
-        if (!res.success) {
-          this.$q.notify({
-            type: "negative",
-            message: "폴더 삭제에 실패했습니다",
+        window.electron
+          .removeFolder({
+            folderPath: this.info.path,
+            projectId: this.info.id,
+          })
+          .then((res) => {
+            const { success } = res;
+            if (success) {
+              this.$q.notify({
+                type: "positive",
+                message: "폴더 삭제에 성공했습니다",
+              });
+              this.$emit("complete:remove-folder");
+            } else {
+              this.$q.notify({
+                type: "negative",
+                message: "폴더 삭제에 실패했습니다",
+              });
+            }
+          })
+          .finally(() => {
+            this.$store.dispatch("settings/setAllPath");
+            this.$q.loading.hide();
           });
-        }
       });
     },
   },
