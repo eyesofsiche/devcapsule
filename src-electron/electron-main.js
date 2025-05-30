@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen } from "electron";
+import { app, BrowserWindow, ipcMain, screen, globalShortcut } from "electron";
 import windowStateKeeper from "electron-window-state";
 import os from "os";
 import path from "path";
@@ -85,11 +85,6 @@ async function createWindow() {
     } catch (err) {
       console.error("❌ installExtension 로드 실패:", err);
     }
-  } else {
-    // we're on production; no access to devtools pls
-    mainWindow.webContents.on("devtools-opened", () => {
-      mainWindow.webContents.closeDevTools();
-    });
   }
 
   mainWindow.on("closed", () => {
@@ -102,6 +97,14 @@ app.whenReady().then(async () => {
   await prepareGitAuthScript();
   await createWindow();
   await registerAllIpcHandlers(mainWindow);
+
+  globalShortcut.register("CommandOrControl+Shift+I", () => {
+    if (!mainWindow.webContents.isDevToolsOpened()) {
+      mainWindow.webContents.openDevTools();
+    } else {
+      mainWindow.webContents.closeDevTools();
+    }
+  });
 
   const settingsDB = await readSection("settings");
   if (settingsDB.autoRefresh) {
