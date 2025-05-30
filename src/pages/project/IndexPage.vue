@@ -142,7 +142,7 @@ export default {
   methods: {
     fetchProject() {
       this.info = null;
-      this.projectName = "";
+      this.projectName = this.project.name;
       window.electron
         .invokeWithReply("cmd:info-project", {
           path: this.project.path,
@@ -151,7 +151,6 @@ export default {
           const { success } = result;
           if (success) {
             this.info = result;
-            this.projectName = this.project.name;
           }
         });
     },
@@ -236,7 +235,7 @@ export default {
       if (!res.success) {
         this.$q.notify({
           type: "negative",
-          message: "VSCode 열기에 실패했습니다",
+          message: res.error || "VSCode 열기에 실패했습니다",
         });
       }
     },
