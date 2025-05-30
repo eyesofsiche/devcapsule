@@ -3,12 +3,14 @@ import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
 import path from "path";
 
+import { getRealUserPath } from "../../helpers/getRealUserPath.js";
 import { getUserDataPath } from "../../utils/userData.js";
 
 const filePath = path.join(getUserDataPath(), "db/lowdb/settings.json");
 const adapter = new JSONFile(filePath);
 const defaultData = {
   version: 1,
+  path: null,
   settings: {
     autoRun: false,
     autoRefresh: false,
@@ -38,6 +40,11 @@ export async function initDB() {
     await migrate();
   }
 
+  if (!db.data.path) {
+    db.data.path = await getRealUserPath();
+    await db.write();
+  }
+
   initialized = true;
 }
 
@@ -56,10 +63,14 @@ export function getDB() {
   return db;
 }
 
-export async function read() {
+export async function read(type = "settings") {
   await db.read();
   if (!db.data.settings) db.data.settings = defaultData.settings;
-  return db.data.settings;
+  if (type === "settings") {
+    return db.data.settings;
+  } else if (type === "all") {
+    return db.data;
+  }
 }
 
 export async function write(data) {

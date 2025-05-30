@@ -48,12 +48,21 @@ contextBridge.exposeInMainWorld("electron", {
 
   selectFolder: async () => {
     try {
-      return await ipcRenderer.invoke("dialog:openDirectory");
+      return await ipcRenderer.invoke("dialog:select-directory");
     } catch (error) {
       console.error("폴더 선택 에러:", error);
       throw error;
     }
   },
+  selectEditor: async () => {
+    try {
+      return await ipcRenderer.invoke("dialog:select-editor");
+    } catch (error) {
+      console.error("폴더 선택 에러:", error);
+      throw error;
+    }
+  },
+
   openFolder: (folderPath) => ipcRenderer.invoke("cmd:open-folder", folderPath),
   openVSCode: (folderPath) => ipcRenderer.invoke("cmd:open-vscode", folderPath),
   openTerminal: (folderPath) =>

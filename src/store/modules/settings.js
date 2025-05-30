@@ -3,8 +3,6 @@ import * as devalue from "devalue";
 const state = {
   autoRun: false,
   autoRefresh: false,
-  theme: "dark",
-  language: "ko",
 };
 
 const mutations = {
@@ -13,12 +11,6 @@ const mutations = {
   },
   SET_AUTO_REFRESH: (state, autoRefresh) => {
     state.autoRefresh = autoRefresh;
-  },
-  SET_THEME: (state, theme) => {
-    state.theme = theme;
-  },
-  SET_LANGUAGE: (state, language) => {
-    state.language = language;
   },
 };
 
@@ -43,8 +35,6 @@ const actions = {
     }
     commit("SET_AUTO_RUN", data.autoRun);
     commit("SET_AUTO_REFRESH", data.autoRefresh);
-    commit("SET_THEME", data.theme);
-    commit("SET_LANGUAGE", data.language);
   },
 
   async setAllPath({ dispatch }) {
