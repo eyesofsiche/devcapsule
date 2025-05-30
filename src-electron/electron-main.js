@@ -7,6 +7,7 @@ import { initAllDB, readSection } from "./db/lowdb/index.js";
 import { prepareGitAuthScript } from "./helpers/git.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
 import { scanner } from "./services/scanProject.js";
+import { initAllWatchers } from "./services/watchingEnv.js";
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -96,6 +97,7 @@ app.whenReady().then(async () => {
   await initAllDB();
   await prepareGitAuthScript();
   await createWindow();
+  await initAllWatchers();
   await registerAllIpcHandlers(mainWindow);
 
   globalShortcut.register("CommandOrControl+Shift+I", () => {
