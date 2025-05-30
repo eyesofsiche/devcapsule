@@ -6,7 +6,7 @@ import path from "path";
 
 import { getGitInfo } from "../helpers/git.js";
 
-async function getEnvPatterns(folderPath) {
+export async function getEnvPatterns(folderPath) {
   const gitignorePath = path.join(folderPath, ".gitignore");
   if (!existsSync(gitignorePath)) {
     return [];
@@ -24,7 +24,7 @@ async function getEnvPatterns(folderPath) {
     );
 }
 
-async function findEnvFiles(folderPath, patterns) {
+export async function findEnvFiles(folderPath, patterns) {
   if (patterns.length === 0) {
     // gitignore에 env 관련 패턴이 없으면 .env 파일은 백업하지 않음.
     return [];

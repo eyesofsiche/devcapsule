@@ -8,6 +8,7 @@ import { analyzeProject } from "../helpers/analyzeProject.js";
 import { copyEnv } from "./copyEnv.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { updateProject } from "./updateProject.js";
+import { addProjectWatcher } from "./watchingEnv.js";
 
 /**
  * 프로젝트 등록
@@ -65,15 +66,20 @@ export async function registerProject(folderPath, projectName = "no title") {
     }
   }
 
-  // local DB 등록
-  await updateProject({
+  const project = {
     id: devcapsule.id,
     name: projectName,
     folderPath,
     git: git.url,
     envs: analysis.envs,
     envPatterns: analysis.envPatterns,
-  });
+  };
+
+  // local DB 등록
+  await updateProject(project);
+
+  // watcher 등록
+  addProjectWatcher(project);
 
   // index.md 파일 업데이트
   await updateIndexMD();
