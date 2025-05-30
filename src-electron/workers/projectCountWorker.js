@@ -1,3 +1,5 @@
+require("module").Module._initPaths();
+
 const { glob } = require("glob");
 const path = require("path");
 const { parentPort } = require("worker_threads");

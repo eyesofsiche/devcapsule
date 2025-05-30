@@ -10,6 +10,7 @@
 
 const path = require("path");
 const { configure } = require("quasar/wrappers");
+
 const appName = "DevCapsule";
 
 module.exports = configure(function (ctx) {
@@ -204,26 +205,27 @@ module.exports = configure(function (ctx) {
       builder: {
         appId: "com.github.eyesofsiche.devcapsule",
         productName: appName,
+
         mac: {
           category: "public.app-category.developer-tools",
           target: "dmg",
-          dmg: {
-            contents: [
-              {
-                x: 410,
-                y: 150,
-                type: "link",
-                path: "/Applications",
-              },
-              {
-                x: 130,
-                y: 150,
-                type: "file",
-              },
-            ],
-          },
+          icon: "src-electron/icons/icon.icns",
         },
-
+        dmg: {
+          contents: [
+            {
+              x: 410,
+              y: 150,
+              type: "link",
+              path: "/Applications",
+            },
+            {
+              x: 130,
+              y: 150,
+              type: "file",
+            },
+          ],
+        },
         extraResources: [
           {
             from: path.resolve(__dirname, "src-electron/workers"),
@@ -231,7 +233,13 @@ module.exports = configure(function (ctx) {
             filter: ["**/*"],
           },
         ],
-        asarUnpack: ["workers/**"],
+        asarUnpack: [
+          "workers/**",
+          "node_modules/glob/**",
+          "node_modules/brace-expansion/**",
+          "node_modules/minimatch/**",
+          "node_modules/balanced-match/**",
+        ],
       },
     },
 

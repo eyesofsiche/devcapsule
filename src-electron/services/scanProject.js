@@ -23,7 +23,16 @@ export class ScanProject {
   // 단일 폴더 스캔 (Worker)
   async scanFolder(folderPath) {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(getWorkerPath("projectCountWorker.js"));
+      const worker = new Worker(getWorkerPath("projectCountWorker.js"), {
+        env: {
+          ...process.env,
+          NODE_PATH: path.join(
+            process.resourcesPath,
+            "app.asar.unpacked",
+            "node_modules"
+          ),
+        },
+      });
       const self = this;
       this.currentWorker = worker;
 
