@@ -2,7 +2,9 @@ import { exec } from "child_process";
 import { ipcMain, dialog, shell } from "electron";
 import fs from "fs";
 import os from "os";
+import path from "path";
 
+import { readSection } from "../../db/lowdb/index.js";
 import { checkUncommittedChanges } from "../../helpers/git.js";
 import {
   excludeFolderList,
@@ -11,7 +13,7 @@ import {
 
 export default function registerSettingsHandlers() {
   // 탐색기
-  ipcMain.handle("dialog:openDirectory", async () => {
+  ipcMain.handle("dialog:select-directory", async () => {
     const result = await dialog.showOpenDialog({
       properties: ["openDirectory"],
     });
@@ -34,6 +36,7 @@ export default function registerSettingsHandlers() {
   });
 
   ipcMain.handle("cmd:open-vscode", async (_, folderPath) => {
+    const settings = await readSection("settings", "all");
     return new Promise((resolve) => {
       // 폴더 존재 여부 확인
       fs.stat(folderPath, (err, stats) => {
@@ -45,14 +48,23 @@ export default function registerSettingsHandlers() {
         }
 
         // 폴더가 있을 경우 VSCode 실행
-        exec(`code "${folderPath}"`, (error, stdout, stderr) => {
-          if (error) {
-            console.error("❌ open-vscode error:", error.message);
-            resolve({ success: false, error: error.message });
-          } else {
-            resolve({ success: true });
+        exec(
+          `code "${folderPath}"`,
+          {
+            env: {
+              ...process.env,
+              PATH: settings.path || process.env.PATH, // 사용자 PATH 설정
+            },
+          },
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error("❌ open-vscode error:", error.message);
+              resolve({ success: false, error: error.message });
+            } else {
+              resolve({ success: true });
+            }
           }
-        });
+        );
       });
     });
   });

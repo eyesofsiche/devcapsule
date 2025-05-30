@@ -17,9 +17,9 @@ export function getDB(name) {
   return modules[name].getDB();
 }
 
-export async function readSection(name) {
+export async function readSection(name, type) {
   if (!modules[name]) throw new Error(`Unknown DB module: ${name}`);
-  return await modules[name].read();
+  return await modules[name].read(type);
 }
 
 export async function writeSection(name, data) {
