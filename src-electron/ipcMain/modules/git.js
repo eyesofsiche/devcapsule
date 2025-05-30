@@ -1,6 +1,5 @@
 import { exec } from "child_process";
 import { ipcMain } from "electron";
-import { existsSync } from "fs";
 import os from "os";
 import path from "path";
 

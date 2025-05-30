@@ -1,6 +1,6 @@
 import fastFolderSize from "fast-folder-size";
 import fg from "fast-glob";
-import { existsSync, statSync } from "fs";
+import { existsSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
