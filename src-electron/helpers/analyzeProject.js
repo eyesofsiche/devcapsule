@@ -47,6 +47,8 @@ export async function analyzeProject(projectPath) {
     license: null,
     git: null,
     size: null,
+    envs: [],
+    envPatterns: [],
   };
 
   const readJson = async (filePath) => {
@@ -62,6 +64,7 @@ export async function analyzeProject(projectPath) {
   const envPatterns = await getEnvPatterns(projectPath);
   const envFiles = await findEnvFiles(projectPath, envPatterns);
   result.envs = envFiles;
+  result.envPatterns = envPatterns;
 
   // package 정보
   const pkgPath = path.join(projectPath, "package.json");

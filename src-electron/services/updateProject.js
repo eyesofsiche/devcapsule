@@ -1,6 +1,13 @@
 import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 
-export async function updateProject({ id, name, folderPath, git, envs }) {
+export async function updateProject({
+  id,
+  name,
+  folderPath,
+  git,
+  envs,
+  envPatterns,
+}) {
   if (!id) {
     throw new Error("Project id is required.");
   }
@@ -21,6 +28,7 @@ export async function updateProject({ id, name, folderPath, git, envs }) {
     isFileExists: existingProject?.isFileExists ?? true,
     git: git ?? existingProject?.git ?? "",
     envs: envs ?? existingProject?.envs ?? [],
+    envPatterns: envPatterns ?? existingProject?.envPatterns ?? [],
   });
 }
 
