@@ -72,6 +72,7 @@ export async function registerProject(folderPath, projectName = "no title") {
     folderPath,
     git: git.url,
     envs: analysis.envs,
+    envPatterns: analysis.envPatterns,
   });
 
   // index.md 파일 업데이트
