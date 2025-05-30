@@ -4,9 +4,12 @@ import fs from "fs/promises";
 import path from "path";
 
 import { readSection } from "../db/lowdb/index.js";
+import { getEnvPatterns, findEnvFiles } from "../helpers/analyzeProject.js";
 import { getUserDataPath } from "../utils/userData.js";
+import { updateProject } from "./updateProject.js";
 
 const watchers = new Map();
+const ignoreWatchers = new Map();
 
 export async function initAllWatchers() {
   const projects = await readSection("projects");
@@ -18,6 +21,7 @@ export async function initAllWatchers() {
 }
 
 export function addProjectWatcher(project) {
+  addProjectIgnore(project);
   if (!project.isFileExists || !project.envs || project.envs.length === 0)
     return;
 
@@ -56,6 +60,39 @@ export function addProjectWatcher(project) {
   }
 }
 
+function addProjectIgnore(project) {
+  if (!project.isFileExists) return;
+  const gitignorePath = path.join(project.path, ".gitignore");
+  if (ignoreWatchers.has(gitignorePath)) return; // 중복 방지
+  if (existsSync(gitignorePath)) {
+    const watcher = chokidar.watch(gitignorePath, {
+      persistent: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 200,
+        pollInterval: 100,
+      },
+    });
+    watcher.on("change", async () => {
+      const envPatterns = await getEnvPatterns(project.path);
+      const envFiles = await findEnvFiles(project.path, envPatterns);
+
+      await updateProject({
+        id: project.id,
+        envPatterns: envPatterns,
+        envs: envFiles,
+      });
+
+      restartProjectWatcher(project.path, project.envs, {
+        ...project,
+        envPatterns: envPatterns,
+        envs: envFiles,
+      });
+    });
+
+    ignoreWatchers.set(gitignorePath, watcher);
+  }
+}
+
 export function stopAllWatching() {
   for (const [_, watcher] of watchers) {
     watcher.close();
@@ -64,6 +101,7 @@ export function stopAllWatching() {
 }
 
 export function removeProjectWatcher(projectPath, envs) {
+  removeIgnoreWatcher(projectPath);
   if (!envs || envs.length === 0) return;
 
   for (const envName of envs) {
@@ -79,8 +117,18 @@ export function removeProjectWatcher(projectPath, envs) {
   }
 }
 
+export function removeIgnoreWatcher(projectPath) {
+  const gitignorePath = path.join(projectPath, ".gitignore");
+  if (ignoreWatchers.has(gitignorePath)) {
+    ignoreWatchers.get(gitignorePath).close();
+    ignoreWatchers.delete(gitignorePath);
+    console.log(`[UNWATCH] .gitignore: ${gitignorePath}`);
+  }
+}
+
 export function restartProjectWatcher(prevProjectPath, prevEnvs, project) {
   removeProjectWatcher(prevProjectPath, prevEnvs);
+  removeIgnoreWatcher(prevProjectPath);
   addProjectWatcher(project);
 }
 

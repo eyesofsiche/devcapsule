@@ -4,6 +4,7 @@ import path from "path";
 import { readSection, removeSection } from "../db/lowdb";
 import { getUserDataPath } from "../utils/userData.js";
 import { updateIndexMD } from "./updateIndexMD.js";
+import { removeProjectWatcher } from "./watchingEnv.js";
 
 /**
  * 프로젝트 제거
@@ -15,6 +16,8 @@ export async function removeProject(id) {
   const project = projectsDB.find((project) => project.id === id);
   const del = await removeSection("projects", id);
   if (project.path) {
+    // watcher 제거
+    removeProjectWatcher(project.path, project.envs);
     const devcapsulePath = path.join(project.path, ".devcapsule");
     try {
       await rm(devcapsulePath, { force: true });
