@@ -43,15 +43,10 @@ export async function registerProject(folderPath, projectName = "no title") {
   }
   devcapsule.cache = {
     ...analysis,
-    success: undefined, // 포함하지 않음
-    path: undefined, // 포함하지 않음
   };
 
-  await fs.writeFile(
-    devcapsulePath,
-    JSON.stringify(devcapsule, null, 2),
-    "utf8"
-  );
+  // devcapsule 파일 생성
+  writeDevcapsuleFile(folderPath, devcapsule);
 
   // git 정보 추출
   const git = analysis.git.remotes.find((remote) => remote.name === "origin");
@@ -90,4 +85,17 @@ export async function registerProject(folderPath, projectName = "no title") {
     path: folderPath,
     fromCache: false,
   };
+}
+
+export async function writeDevcapsuleFile(folderPath, devcapsule) {
+  const result = {
+    ...devcapsule,
+  };
+  result.cache = {
+    ...result.cache,
+    success: undefined, // 포함하지 않음
+    path: undefined, // 포함하지 않음
+  };
+  const devcapsulePath = path.join(folderPath, ".devcapsule");
+  await fs.writeFile(devcapsulePath, JSON.stringify(result, null, 2), "utf8");
 }

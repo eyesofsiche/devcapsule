@@ -143,16 +143,26 @@ export default {
     fetchProject() {
       this.info = null;
       this.projectName = this.project.name;
-      window.electron
-        .invokeWithReply("cmd:info-project", {
-          path: this.project.path,
-        })
-        .then((result) => {
-          const { success } = result;
-          if (success) {
-            this.info = result;
-          }
-        });
+      window.electron.invoke("cmd:info-project", {
+        path: this.project.path,
+      });
+      this.handleProjectUpdate = (data) => {
+        if (data.type === "cache") {
+          this.info = data.data;
+        } else if (data.type === "updated") {
+          this.info = data.data;
+
+          window.electron.removeListener(
+            "event:info-project-updated",
+            this.handleProjectUpdate
+          );
+        }
+      };
+
+      window.electron.on(
+        "event:info-project-updated",
+        this.handleProjectUpdate
+      );
     },
     changeProjectName() {
       if (this.projectName === this.project.name) return;
@@ -222,7 +232,7 @@ export default {
         });
     },
     async clickOpenFinder() {
-      const res = await window.electron.openFolder(this.info.path);
+      const res = await window.electron.openFolder(this.project.path);
       if (!res.success) {
         this.$q.notify({
           type: "negative",
@@ -231,7 +241,7 @@ export default {
       }
     },
     async clickOpenVSCode() {
-      const res = await window.electron.openVSCode(this.info.path);
+      const res = await window.electron.openVSCode(this.project.path);
       if (!res.success) {
         this.$q.notify({
           type: "negative",
@@ -240,7 +250,7 @@ export default {
       }
     },
     async clickOpenTerminal() {
-      const res = await window.electron.openTerminal(this.info.path);
+      const res = await window.electron.openTerminal(this.project.path);
       if (!res.success) {
         this.$q.notify({
           type: "negative",
