@@ -36,6 +36,18 @@ import { invokeWithReply } from "./utils/ipc.js";
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electron", {
   invokeWithReply,
+  invoke: (channel, data) => {
+    const validChannels = ["cmd:info-project"];
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, data);
+    }
+  },
+  on: (channel, listener) => {
+    ipcRenderer.on(channel, (event, ...args) => listener(...args));
+  },
+  removeListener: (channel, listener) => {
+    ipcRenderer.removeListener(channel, listener);
+  },
   lowdb: {
     get: (key) => ipcRenderer.invoke("lowdb:get", key),
     set: (key, value) => ipcRenderer.invoke("lowdb:set", { key, value }),

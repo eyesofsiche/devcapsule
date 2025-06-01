@@ -20,20 +20,24 @@ export async function copyEnv(folderPath, projectId, envFiles = [".env"]) {
   const undoTasks = [];
 
   try {
-    // 6.1) envsBase 폴더 보장
+    // envsBase 폴더 보장
     await fs.mkdir(envsBase, { recursive: true });
 
-    // 6.2) 프로젝트별 디렉토리 생성
+    // 기존 백업 디렉토리 제거 (있다면)
+    if (existsSync(projectEnvDir)) {
+      await fs.rm(projectEnvDir, { recursive: true, force: true });
+    }
+
+    // 프로젝트별 디렉토리 생성
     await fs.mkdir(projectEnvDir, { recursive: true });
     undoTasks.push(async () => {
       await fs.rm(projectEnvDir, { recursive: true, force: true });
     });
 
-    // 6.3) 각 env 파일 복사
+    // 현재 envFiles 기준으로 다시 백업
     for (const fileName of envFiles) {
       const src = path.join(folderPath, fileName);
       if (existsSync(src)) {
-        // throw new Error(`복사 대상 파일이 없습니다: ${fileName}`);
         const dest = path.join(projectEnvDir, fileName);
         await fs.copyFile(src, dest);
         undoTasks.push(async () => {
