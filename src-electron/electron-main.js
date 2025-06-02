@@ -1,4 +1,12 @@
-import { app, BrowserWindow, ipcMain, screen, globalShortcut } from "electron";
+import {
+  app,
+  BrowserWindow,
+  screen,
+  globalShortcut,
+  Tray,
+  Menu,
+  nativeImage,
+} from "electron";
 import windowStateKeeper from "electron-window-state";
 import os from "os";
 import path from "path";
@@ -13,6 +21,8 @@ import { initAllWatchers } from "./services/watchingEnv.js";
 const platform = process.platform || os.platform();
 
 let mainWindow;
+let tray = null;
+let isQuitting = false;
 
 async function createWindow() {
   // 창 위치/크기 이전 상태 불러오기
@@ -88,9 +98,20 @@ async function createWindow() {
     }
   }
 
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
+  mainWindow
+    .on("closed", () => {
+      mainWindow = null;
+    })
+    .on("close", (event) => {
+      if (!isQuitting) {
+        event.preventDefault();
+        mainWindow.hide();
+      }
+    });
+}
+
+if (process.platform === "darwin") {
+  app.dock.hide();
 }
 
 app.whenReady().then(async () => {
@@ -99,6 +120,37 @@ app.whenReady().then(async () => {
   await createWindow();
   await initAllWatchers();
   await registerAllIpcHandlers(mainWindow);
+
+  const iconPath = path.join(process.cwd(), "public/icons/icon_tray.png");
+  const trayIcon = nativeImage.createFromPath(iconPath);
+  trayIcon.setTemplateImage(true);
+
+  tray = new Tray(trayIcon);
+  console.log("trayIcon is empty:", trayIcon.isEmpty()); // true면 로딩 실패
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "열기",
+      click: () => {
+        if (mainWindow) mainWindow.show();
+      },
+    },
+    {
+      label: "종료",
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setToolTip("DevCapsule");
+  tray.setContextMenu(contextMenu);
+
+  tray.on("click", () => {
+    if (mainWindow) {
+      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
+    }
+  });
 
   globalShortcut.register("CommandOrControl+Shift+I", () => {
     if (!mainWindow.webContents.isDevToolsOpened()) {
@@ -112,6 +164,10 @@ app.whenReady().then(async () => {
   if (settingsDB.autoRefresh) {
     scanner.startAuto();
   }
+});
+
+app.on("before-quit", () => {
+  isQuitting = true;
 });
 
 app.on("window-all-closed", () => {
