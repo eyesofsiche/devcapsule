@@ -232,6 +232,10 @@ module.exports = configure(function (ctx) {
             to: "workers",
             filter: ["**/*"],
           },
+          {
+            from: path.resolve(__dirname, "src-electron/icons"),
+            to: "icons",
+          },
         ],
         asarUnpack: [
           "workers/**",

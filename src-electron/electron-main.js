@@ -114,6 +114,14 @@ if (process.platform === "darwin") {
   app.dock.hide();
 }
 
+function getIconPath(name) {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, "icons", name);
+  } else {
+    return path.join(process.cwd(), `public/icons/${name}`);
+  }
+}
+
 app.whenReady().then(async () => {
   await initAllDB();
   await prepareGitAuthScript();
@@ -121,7 +129,7 @@ app.whenReady().then(async () => {
   await initAllWatchers();
   await registerAllIpcHandlers(mainWindow);
 
-  const iconPath = path.join(process.cwd(), "public/icons/icon_tray.png");
+  const iconPath = getIconPath("icon_tray.png");
   const trayIcon = nativeImage.createFromPath(iconPath);
   trayIcon.setTemplateImage(true);
 
