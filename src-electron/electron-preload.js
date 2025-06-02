@@ -94,9 +94,9 @@ contextBridge.exposeInMainWorld("electron", {
   },
 
   // 창 컨트롤 기능 추가
-  windowControl: {
-    minimize: () => ipcRenderer.send("window:minimize"),
-    maximize: () => ipcRenderer.send("window:maximize"),
-    close: () => ipcRenderer.send("window:close"),
-  },
+  // windowControl: {
+  //   minimize: () => ipcRenderer.send("window:minimize"),
+  //   maximize: () => ipcRenderer.send("window:maximize"),
+  //   close: () => ipcRenderer.send("window:close"),
+  // },
 });
