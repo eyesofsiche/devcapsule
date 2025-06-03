@@ -53,6 +53,15 @@ export default function registerProjectHandlers(mainWindow) {
     });
   });
 
+  ipcMain.on("cmd:info-project", async (event, { replyChannel, path }) => {
+    try {
+      const result = await analyzeProject(path);
+      event.reply(replyChannel, result);
+    } catch (err) {
+      event.reply(replyChannel, { success: false });
+    }
+  });
+
   ipcMain.on(
     "cmd:create-project",
     async (event, { replyChannel, path, name }) => {
