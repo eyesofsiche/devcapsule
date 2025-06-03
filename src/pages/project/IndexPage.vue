@@ -144,7 +144,7 @@ export default {
       this.info = null;
       this.projectName = this.project.name;
       window.electron.invoke("cmd:info-project", {
-        path: this.project.path,
+        id: this.project.id,
       });
       this.handleProjectUpdate = (data) => {
         if (data.type === "cache") {
