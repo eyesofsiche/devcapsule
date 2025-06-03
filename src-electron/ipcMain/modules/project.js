@@ -1,11 +1,10 @@
 import { ipcMain } from "electron";
 
+import { readSection } from "../../db/lowdb/index.js";
 import { analyzeProject } from "../../helpers/analyzeProject.js";
-import { readCacheFromFile } from "../../helpers/readCacheFromFile.js";
 import { registerProject } from "../../services/registerProject.js";
 import { removeProject } from "../../services/removeProject.js";
 import { restoreProject } from "../../services/restoreProject.js";
-import { saveCacheUpdate } from "../../services/saveCacheUpdate.js";
 import { scanner } from "../../services/scanProject.js";
 import { updateProject } from "../../services/updateProject.js";
 
@@ -35,16 +34,17 @@ export default function registerProjectHandlers(mainWindow) {
     return result;
   });
 
-  ipcMain.handle("cmd:info-project", async (event, { path }) => {
-    const cacheInfo = await readCacheFromFile(path);
-    // 캐시 정보 전송
+  ipcMain.handle("cmd:info-project", async (event, { id }) => {
+    const projects = await readSection("projects");
+    const project = projects.find((p) => p.id === id);
+    // DB 정보 전송
     event.sender.send("event:info-project-updated", {
       type: "cache",
-      data: cacheInfo.cache,
+      data: project,
     });
 
-    const updated = await analyzeProject(path);
-    saveCacheUpdate(path, cacheInfo, updated);
+    const updated = await analyzeProject(project.path);
+    updateProject({ ...updated, id });
 
     // 새로운 분석 정보 전송
     event.sender.send("event:info-project-updated", {

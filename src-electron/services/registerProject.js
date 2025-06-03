@@ -41,15 +41,9 @@ export async function registerProject(folderPath, projectName = "no title") {
   if (analysis.success === false) {
     throw new Error("프로젝트 분석 실패");
   }
-  devcapsule.cache = {
-    ...analysis,
-  };
 
   // devcapsule 파일 생성
   writeDevcapsuleFile(folderPath, devcapsule);
-
-  // git 정보 추출
-  const git = analysis.git.remotes.find((remote) => remote.name === "origin");
 
   // .env 파일 복사 및 md 파일 업데이트, 실패시 local DB 롤백. env 파일이 없으면 무시
   if (analysis.envs.length > 0) {
@@ -65,7 +59,7 @@ export async function registerProject(folderPath, projectName = "no title") {
     id: devcapsule.id,
     name: projectName,
     folderPath,
-    git: git.url,
+    git: analysis.git,
     envs: analysis.envs,
     envPatterns: analysis.envPatterns,
   };
@@ -89,12 +83,7 @@ export async function registerProject(folderPath, projectName = "no title") {
 
 export async function writeDevcapsuleFile(folderPath, devcapsule) {
   const result = {
-    ...devcapsule,
-  };
-  result.cache = {
-    ...result.cache,
-    success: undefined, // 포함하지 않음
-    path: undefined, // 포함하지 않음
+    id: devcapsule.id,
   };
   const devcapsulePath = path.join(folderPath, ".devcapsule");
   await fs.writeFile(devcapsulePath, JSON.stringify(result, null, 2), "utf8");
