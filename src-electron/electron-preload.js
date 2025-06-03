@@ -53,7 +53,8 @@ contextBridge.exposeInMainWorld("electron", {
     set: (key, value) => ipcRenderer.invoke("lowdb:set", { key, value }),
     write: (key, value) => ipcRenderer.invoke("lowdb:write", { key, value }),
   },
-  autoRefresh: (flag, type) => {
+  setAutoLaunch: (enable) => ipcRenderer.invoke("set:auto-launch", enable),
+  setAutoRefresh: (flag, type) => {
     ipcRenderer.send("cmd:change-auto-refresh", flag);
   },
   manualRefresh: () => ipcRenderer.invoke("cmd:manual-refresh"),

@@ -1,8 +1,8 @@
+import AutoLaunch from "auto-launch";
 import { exec } from "child_process";
 import { ipcMain, dialog, shell } from "electron";
 import fs from "fs";
 import os from "os";
-import path from "path";
 
 import { readSection } from "../../db/lowdb/index.js";
 import { checkUncommittedChanges } from "../../helpers/git.js";
@@ -11,7 +11,21 @@ import {
   updateProjectFileExists,
 } from "../../services/updateProject.js";
 
+const appLauncher = new AutoLaunch({
+  name: "DevCapsule",
+  path: process.execPath,
+});
+
 export default function registerSettingsHandlers() {
+  // 자동 실행 설정
+  ipcMain.handle("set:auto-launch", async (event, enable) => {
+    if (enable) {
+      await appLauncher.enable();
+    } else {
+      await appLauncher.disable();
+    }
+  });
+
   // 탐색기
   ipcMain.handle("dialog:select-directory", async () => {
     const result = await dialog.showOpenDialog({

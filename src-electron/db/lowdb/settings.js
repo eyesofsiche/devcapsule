@@ -1,3 +1,4 @@
+import AutoLaunch from "auto-launch";
 import fs from "fs/promises";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
@@ -22,8 +23,15 @@ const defaultData = {
 let db = new Low(adapter, defaultData);
 let initialized = false;
 
+const appLauncher = new AutoLaunch({
+  name: "DevCapsule",
+  path: process.execPath,
+});
+
 export async function initDB() {
   if (initialized) return;
+  const isEnabled = await appLauncher.isEnabled();
+  defaultData.settings.autoRun = isEnabled;
 
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await db.read();
@@ -65,6 +73,9 @@ export function getDB() {
 
 export async function read(type = "settings") {
   await db.read();
+  const isEnabled = await appLauncher.isEnabled();
+  db.data.settings.autoRun = isEnabled;
+  defaultData.settings.autoRun = isEnabled;
   if (!db.data.settings) db.data.settings = defaultData.settings;
   if (type === "settings") {
     return db.data.settings;
