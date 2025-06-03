@@ -138,14 +138,9 @@ app.whenReady().then(async () => {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "열기",
-      click: () => {
-        if (mainWindow) mainWindow.show();
-      },
-    },
-    {
       label: "종료",
       click: () => {
+        isQuitting = true;
         app.quit();
       },
     },
@@ -174,8 +169,14 @@ app.whenReady().then(async () => {
   }
 });
 
-app.on("before-quit", () => {
-  isQuitting = true;
+app.on("before-quit", (event) => {
+  if (!isQuitting) {
+    event.preventDefault();
+    if (mainWindow) mainWindow.hide();
+    if (process.platform === "darwin") {
+      app.dock.hide();
+    }
+  }
 });
 
 app.on("window-all-closed", () => {
