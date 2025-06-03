@@ -134,7 +134,6 @@ app.whenReady().then(async () => {
   trayIcon.setTemplateImage(true);
 
   tray = new Tray(trayIcon);
-  console.log("trayIcon is empty:", trayIcon.isEmpty()); // true면 로딩 실패
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -170,6 +169,10 @@ app.whenReady().then(async () => {
 });
 
 app.on("before-quit", (event) => {
+  if (process.env.NODE_ENV === "development") {
+    isQuitting = true;
+    return;
+  }
   if (!isQuitting) {
     event.preventDefault();
     if (mainWindow) mainWindow.hide();
