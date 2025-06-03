@@ -25,8 +25,11 @@ const actions = {
   },
   setSettings({ commit }, { data, options = { save: true } }) {
     if (options.save) {
+      if (state.autoRun !== data.autoRun) {
+        window.electron.setAutoLaunch(data.autoRun);
+      }
       if (state.autoRefresh !== data.autoRefresh) {
-        window.electron.autoRefresh(data.autoRefresh);
+        window.electron.setAutoRefresh(data.autoRefresh);
       }
       window.electron.lowdb.set(
         "settings",

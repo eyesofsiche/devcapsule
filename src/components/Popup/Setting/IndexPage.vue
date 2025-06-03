@@ -57,7 +57,7 @@ export default {
     modelValue: {
       handler(val) {
         if (this.settings.autoRefresh) {
-          window.electron.autoRefresh(!val);
+          window.electron.setAutoLaunch(!val);
         }
       },
     },
