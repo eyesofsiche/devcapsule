@@ -54,7 +54,7 @@ export async function saveCacheUpdate(projectPath, cache, updated) {
     await updateProject({
       id: cache.id,
       name: updated.name,
-      folderPath: projectPath,
+      path: projectPath,
       git: updated.git,
       envs: updated.envs,
       envPatterns: updated.envPatterns,
