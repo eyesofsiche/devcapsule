@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
-import { getUserDataPath } from "../utils/userData.js";
+import { getUserDataPath } from "../utils/getPath.js";
 
 /**
  * 6번 로직: env 파일 복사 + index.md 업데이트

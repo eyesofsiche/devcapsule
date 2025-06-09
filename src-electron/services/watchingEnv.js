@@ -5,7 +5,7 @@ import path from "path";
 
 import { readSection } from "../db/lowdb/index.js";
 import { getEnvPatterns, findEnvFiles } from "../helpers/analyzeProject.js";
-import { getUserDataPath } from "../utils/userData.js";
+import { getUserDataPath } from "../utils/getPath.js";
 import { updateProject } from "./updateProject.js";
 
 const watchers = new Map();

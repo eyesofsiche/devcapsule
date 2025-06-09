@@ -5,7 +5,7 @@ import { JSONFile } from "lowdb/node";
 import path from "path";
 
 import { getRealUserPath } from "../../helpers/getRealUserPath.js";
-import { getUserDataPath } from "../../utils/userData.js";
+import { getUserDataPath } from "../../utils/getPath.js";
 
 const filePath = path.join(getUserDataPath(), "db/lowdb/settings.json");
 const adapter = new JSONFile(filePath);
