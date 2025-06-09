@@ -137,6 +137,12 @@ app.whenReady().then(async () => {
 
   const contextMenu = Menu.buildFromTemplate([
     {
+      label: "열기",
+      click: () => {
+        if (mainWindow) mainWindow.show();
+      },
+    },
+    {
       label: "종료",
       click: () => {
         isQuitting = true;
@@ -147,12 +153,6 @@ app.whenReady().then(async () => {
 
   tray.setToolTip("DevCapsule");
   tray.setContextMenu(contextMenu);
-
-  tray.on("click", () => {
-    if (mainWindow && !mainWindow.isVisible()) {
-      mainWindow.show();
-    }
-  });
 
   globalShortcut.register("CommandOrControl+Shift+I", () => {
     if (!mainWindow.webContents.isDevToolsOpened()) {
