@@ -3,7 +3,7 @@ import path from "path";
 import simpleGit from "simple-git";
 
 import { readSection } from "../db/lowdb/index.js";
-import { getUserDataPath } from "../utils/userData.js";
+import { getUserDataPath } from "../utils/getPath.js";
 import { updateProjectFileExists } from "./updateProject.js";
 
 export async function restoreProject(projectId) {

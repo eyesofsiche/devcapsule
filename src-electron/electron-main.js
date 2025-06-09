@@ -16,6 +16,7 @@ import { prepareGitAuthScript } from "./helpers/git.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
 import { scanner } from "./services/scanProject.js";
 import { initAllWatchers } from "./services/watchingEnv.js";
+import { getResourcesPublicPath } from "./utils/getPath.js";
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -114,14 +115,6 @@ if (process.platform === "darwin") {
   app.dock.hide();
 }
 
-function getIconPath(name) {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, "icons", name);
-  } else {
-    return path.join(process.cwd(), `public/icons/${name}`);
-  }
-}
-
 app.whenReady().then(async () => {
   await initAllDB();
   await prepareGitAuthScript();
@@ -129,7 +122,7 @@ app.whenReady().then(async () => {
   await initAllWatchers();
   await registerAllIpcHandlers(mainWindow);
 
-  const iconPath = getIconPath("icon_tray.png");
+  const iconPath = getResourcesPublicPath("icons/icon_tray.png");
   const trayIcon = nativeImage.createFromPath(iconPath);
   trayIcon.setTemplateImage(true);
 

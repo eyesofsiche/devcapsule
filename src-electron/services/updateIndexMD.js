@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 
 import { readSection } from "../db/lowdb";
-import { getUserDataPath } from "../utils/userData.js";
+import { getUserDataPath } from "../utils/getPath.js";
 
 export async function content() {
   try {

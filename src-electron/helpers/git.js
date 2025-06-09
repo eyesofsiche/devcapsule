@@ -4,7 +4,7 @@ import os from "os";
 import path from "path";
 import simpleGit from "simple-git";
 
-import { getUserDataPath } from "../utils/userData.js";
+import { getUserDataPath } from "../utils/getPath.js";
 
 export async function prepareGitAuthScript() {
   const authScriptDir = path.join(getUserDataPath(), "git-auth");

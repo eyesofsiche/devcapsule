@@ -2,7 +2,7 @@ import { rm } from "fs/promises";
 import path from "path";
 
 import { readSection, removeSection } from "../db/lowdb";
-import { getUserDataPath } from "../utils/userData.js";
+import { getUserDataPath } from "../utils/getPath.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { removeProjectWatcher } from "./watchingEnv.js";
 

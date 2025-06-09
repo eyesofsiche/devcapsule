@@ -3,7 +3,7 @@ import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
 import path from "path";
 
-import { getUserDataPath } from "../../utils/userData.js";
+import { getUserDataPath } from "../../utils/getPath.js";
 
 const filePath = path.join(getUserDataPath(), "db/lowdb/projects.json");
 const adapter = new JSONFile(filePath);

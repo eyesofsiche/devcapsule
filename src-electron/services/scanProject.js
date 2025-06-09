@@ -1,16 +1,8 @@
-import { app } from "electron";
 import path from "path";
 import { Worker } from "worker_threads";
 
 import { readSection, writeSection } from "../db/lowdb/index.js";
-
-function getWorkerPath(name) {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, "workers", name);
-  } else {
-    return path.resolve(__dirname, `../../src-electron/workers/${name}`);
-  }
-}
+import { getResourcesPath } from "../utils/getPath.js";
 
 export class ScanProject {
   constructor() {
@@ -23,16 +15,19 @@ export class ScanProject {
   // 단일 폴더 스캔 (Worker)
   async scanFolder(folderPath) {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(getWorkerPath("projectCountWorker.js"), {
-        env: {
-          ...process.env,
-          NODE_PATH: path.join(
-            process.resourcesPath,
-            "app.asar.unpacked",
-            "node_modules"
-          ),
-        },
-      });
+      const worker = new Worker(
+        getResourcesPath("workers/projectCountWorker.js"),
+        {
+          env: {
+            ...process.env,
+            NODE_PATH: path.join(
+              process.resourcesPath,
+              "app.asar.unpacked",
+              "node_modules"
+            ),
+          },
+        }
+      );
       const self = this;
       this.currentWorker = worker;
 
