@@ -1,41 +1,75 @@
-# DEV Capsule (dev-capsule)
+# DevCapsule
 
-One-click restore for your development projects with env, git, and install management.
+개발자들을 위한 데스크탑 도구 – `.env` 백업 및 프로젝트 복구
 
-## Install the dependencies
+![DevCapsule Logo](./public/icons/favicon-128x128.png)
+
+---
+
+## 💡 제작 배경
+
+SI 프로젝트를 하다 보면 항상 골칫거리가 되는 게 `.env` 파일이다.  
+백업해뒀다고 생각했는데 막상 필요할 땐 없고, 이게 누구 프로젝트였는지도 헷갈리고...  
+지금 내 노트북엔 프로젝트가 무려 65개나 되는데,  
+안 쓸 것 같아 지웠다가 나중에 다시 실행하려면 GitHub, 회사 GitLab, 개인 GitLab 왔다 갔다 하며 다시 클론하고 설정하는 데 시간만 줄줄 새고...
+
+처음엔 터미널에서 쓰는 CLI 툴로 만들 생각이었지만,  
+ChatGPT가 "이거 오픈소스로 하면 괜찮겠다~!" 하는 말에 혹해서 Electron으로 GUI 버전까지 만들게 된 사연 깊은 프로그램이다.
+
+Electron은 처음이라 ChatGPT가 많은 도움을 줬다. 1번째 기여자이다.
+
+---
+
+## 🧩 개요
+
+**DevCapsule**은 여러 프로젝트를 동시에 관리해야 하는 개발자들을 위한 데스크탑 애플리케이션이다.  
+`.env` 파일의 백업과 복구를 중심으로, 프로젝트 상태를 한눈에 확인하고 손쉽게 복원할 수 있도록 도와준다.
+
+- **프레임워크:** Quasar (Vue 3 Options API 기반)
+- **템플릿 엔진:** Pug
+- **배포 형태:** Electron 앱
+
+---
+
+## 🔧 주요 기능
+
+### 📁 프로젝트 등록 및 분석
+
+- Git 정보 (원격 저장소, 브랜치, 커밋 로그 등) 분석
+- `.gitignore`에 따라 무시되지 않은 `.env`, `.env.*` 파일만 백업 대상으로 설정
+
+### 🧠 변경 감지 및 백업
+
+- `.env` 파일의 생성, 수정, 삭제를 실시간 감지
+- 변경된 파일만 자동 백업
+
+### ♻️ 삭제 및 복원
+
+- 프로젝트가 삭제되어도 `.env` 백업과 Git 정보 기반으로 클릭 한 번에 복구
+- 복원 시: `git clone` → `.env` 복원까지 자동 수행
+
+---
+
+<!-- ## 📌 향후 계획
+
+- 🔄 **멀티 디바이스 동기화**
+  현재는 로컬 PC에서만 작동하지만, 향후 여러 PC 간 프로젝트 상태와 `.env` 파일을 동기화할 수 있도록 확장 예정입니다.
+
+- 🪟 **Windows OS 정식 지원**
+  현재는 macOS 중심으로 개발되었으며, Windows 환경에서도 안정적으로 동작하도록 지원을 강화할 예정입니다.
+
+- 🌐 **다국어 지원**
+  UI 다국어(한국어, 영어 등) 지원을 통해 다양한 환경의 개발자들이 사용할 수 있도록 개선할 계획입니다.
+
+--- -->
+
+## 🚀 설치 및 실행
+
+### 개발 모드
+
 ```bash
-yarn
-# or
+git clone https://github.com/eyesofsiche/devcapsule.git
+cd devcapsule
 npm install
+quasar dev -m electron
 ```
-
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
-```bash
-quasar dev
-```
-
-
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-
-### Format the files
-```bash
-yarn format
-# or
-npm run format
-```
-
-
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
