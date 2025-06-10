@@ -63,11 +63,11 @@ q-page(:class="!project ? 'flex flex-center' : ''")
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
             | 기본정보
-          label-value(label="경로" :value="project?.path" :width="labelWidth")
+          label-value(label="경로" :value="info?.path" :width="labelWidth")
           label-value(label="이름" :value="info?.name" :width="labelWidth")
-          label-value(label="버전" :value="info?.version" :width="labelWidth")
-          label-value(label="설명" :value="info?.description" :width="labelWidth")
-          label-value(label="라이센스" :value="info?.license" :width="labelWidth")
+          label-value(v-if="info?.version" label="버전" :value="info?.version" :width="labelWidth")
+          label-value(v-if="info?.description" label="설명" :value="info?.description" :width="labelWidth")
+          label-value(v-if="info?.license" label="라이센스" :value="info?.license" :width="labelWidth")
           label-value(v-if="info?.envs?.length > 0" label=".env" :value="info?.envs" :width="labelWidth")
           label-value(label="디렉토리 크기" :value="info?.size" :width="labelWidth")
 
@@ -78,16 +78,6 @@ q-page(:class="!project ? 'flex flex-center' : ''")
             label-value(label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
             label-value(v-if="info?.git?.remotes.length > 0" label="remote" :value="remotes" :width="labelWidth")
             label-value(label="마지막 커밋" :value="info?.git?.lastCommit.message" :width="labelWidth")
-
-          //- q-item-label(header :style="`width: ${labelWidth};`")
-            q-icon.q-mr-sm(name="mdi-book-multiple" size="20px" color="white")
-            | 의존성
-
-          //- q-item-label(header :style="`width: ${labelWidth};`")
-            q-icon.q-mr-sm(name="mdi-file-document-multiple" size="20px" color="white")
-            | 구조
-
-        
 </template>
 
 <script>
@@ -141,7 +131,7 @@ export default {
   },
   methods: {
     fetchProject() {
-      this.info = null;
+      this.info = this.$_.cloneDeep(this.project);
       this.projectName = this.project.name;
       window.electron.invoke("cmd:info-project", {
         id: this.project.id,
@@ -156,6 +146,7 @@ export default {
             "event:info-project-updated",
             this.handleProjectUpdate
           );
+          this.$store.dispatch("projects/init");
         }
       };
 
