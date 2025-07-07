@@ -88,7 +88,7 @@ import FlatInput from "@/components/Form/FlatInput.vue";
 import LabelValue from "@/components/Form/LabelValue.vue";
 
 export default {
-  name: "RegisterPage",
+  name: "ProjectPage",
   components: {
     FlatInput,
     LabelValue,
@@ -120,7 +120,6 @@ export default {
       immediate: true,
     },
   },
-  mounted() {},
   data() {
     return {
       id: null,

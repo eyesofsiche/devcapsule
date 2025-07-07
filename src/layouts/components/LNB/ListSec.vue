@@ -45,7 +45,7 @@ import { mapGetters } from "vuex";
 
 import UnregList from "./UnregList.vue";
 export default {
-  name: "LNB",
+  name: "ProjectList",
   components: {
     UnregList,
   },
