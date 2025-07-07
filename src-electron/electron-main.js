@@ -108,11 +108,10 @@ async function createWindow() {
         event.preventDefault();
         mainWindow.hide();
       }
+      if (process.platform === "darwin") {
+        app.dock.hide();
+      }
     });
-}
-
-if (process.platform === "darwin") {
-  app.dock.hide();
 }
 
 app.whenReady().then(async () => {
@@ -132,7 +131,13 @@ app.whenReady().then(async () => {
     {
       label: "열기",
       click: () => {
-        if (mainWindow) mainWindow.show();
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+          if (process.platform === "darwin") {
+            app.dock.show();
+          }
+        }
       },
     },
     {
