@@ -63,6 +63,7 @@
 
 <script>
 export default {
+  name: "SettingPage",
   async mounted() {
     // try {
     //   // 저장된 경로들 불러오기
@@ -141,9 +142,6 @@ export default {
 
     async applyPaths() {
       try {
-        // await window.electron.invoke("set-db", "settings", {
-        //   watchPath: this.selectedPaths,
-        // });
         this.$store.dispatch("common/setSettings", {
           watchPath: this.selectedPaths,
         });
