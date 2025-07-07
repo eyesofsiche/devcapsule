@@ -91,6 +91,7 @@ export default {
           name: "register",
           query: {
             index: index - 1,
+            path: this.list[index - 1],
           },
         });
       }
@@ -101,6 +102,7 @@ export default {
           name: "register",
           query: {
             index: index + 1,
+            path: this.list[index + 1],
           },
         });
       }
