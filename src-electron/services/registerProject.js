@@ -57,6 +57,7 @@ export async function registerProject(folderPath, projectName = "no title") {
 
   const project = {
     id: devcapsule.id,
+    projectName,
     name: projectName,
     path: folderPath,
     git: analysis.git,
