@@ -28,7 +28,8 @@ export async function updateProject({
   await updateSection("projects", {
     id,
     name: name ?? existingProject?.name ?? "no title",
-    projectName: projectName ?? existingProject?.projectName ?? "no title",
+    projectName:
+      projectName ?? existingProject?.projectName ?? existingProject?.name,
     path: path ?? existingProject?.path ?? "",
     lastSynced: new Date().toISOString(),
     isFileExists: existingProject?.isFileExists ?? true,
