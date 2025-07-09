@@ -19,7 +19,12 @@ const actions = {
   async init({ dispatch }) {
     const list = await window.electron.lowdb.get("projects");
     dispatch("setList", {
-      list,
+      list: list.map((item) => {
+        return {
+          ...item,
+          projectName: item.projectName || item.name,
+        };
+      }),
       options: { save: false },
     });
   },
@@ -32,10 +37,10 @@ const actions = {
       );
     }
   },
-  setProjectName({ state, dispatch }, { id, name }) {
+  setProjectName({ state, dispatch }, { id, projectName }) {
     const list = state.list.map((item) => {
       if (item.id === id) {
-        return { ...item, name };
+        return { ...item, projectName };
       }
       return item;
     });

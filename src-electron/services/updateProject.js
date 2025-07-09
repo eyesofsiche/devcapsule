@@ -3,6 +3,7 @@ import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 export async function updateProject({
   id,
   name,
+  projectName,
   path,
   version,
   description,
@@ -27,6 +28,7 @@ export async function updateProject({
   await updateSection("projects", {
     id,
     name: name ?? existingProject?.name ?? "no title",
+    projectName: projectName ?? existingProject?.projectName ?? "no title",
     path: path ?? existingProject?.path ?? "",
     lastSynced: new Date().toISOString(),
     isFileExists: existingProject?.isFileExists ?? true,

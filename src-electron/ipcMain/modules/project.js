@@ -76,9 +76,9 @@ export default function registerProjectHandlers(mainWindow) {
 
   ipcMain.on(
     "cmd:update-project-name",
-    async (event, { replyChannel, id, name }) => {
+    async (event, { replyChannel, id, projectName }) => {
       try {
-        await updateProject({ id, name });
+        await updateProject({ id, projectName });
         event.reply(replyChannel, { success: true });
       } catch (err) {
         event.reply(replyChannel, { success: false, error: err.message });

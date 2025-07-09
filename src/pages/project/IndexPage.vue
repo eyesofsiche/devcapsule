@@ -131,7 +131,7 @@ export default {
   methods: {
     fetchProject() {
       this.info = this.$_.cloneDeep(this.project);
-      this.projectName = this.project.name;
+      this.projectName = this.project.projectName;
       window.electron.invoke("cmd:info-project", {
         id: this.project.id,
       });
@@ -155,33 +155,33 @@ export default {
       );
     },
     changeProjectName() {
-      if (this.projectName === this.project.name) return;
+      if (this.projectName === this.project.projectName) return;
       if (this.projectName === "") {
         this.$q.notify({
           type: "negative",
           message: "프로젝트 이름은 비워둘 수 없습니다.",
         });
-        this.projectName = this.project.name;
+        this.projectName = this.project.projectName;
         return;
       }
       window.electron
         .invokeWithReply("cmd:update-project-name", {
           id: this.project.id,
-          name: this.projectName,
+          projectName: this.projectName,
         })
         .then((result) => {
           const { success, error } = result;
           if (success) {
             this.$store.dispatch("projects/setProjectName", {
               id: this.project.id,
-              name: this.projectName,
+              projectName: this.projectName,
             });
           } else {
             this.$q.notify({
               type: "negative",
               message: error || "프로젝트 이름 변경에 실패했습니다.",
             });
-            this.projectName = this.project.name;
+            this.projectName = this.project.projectName;
           }
         });
     },

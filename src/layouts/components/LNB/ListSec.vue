@@ -36,7 +36,7 @@ q-scroll-area.scroll#scroll-lbn-area
                 )
                   q-icon(v-if="item.isFileExists" name="check_circle" size="20px" color="white")
                   q-icon(v-else name="mdi-link-variant-off" size="20px" color="white")
-                  span.label {{ item.name }}
+                  span.label {{ item.projectName }}
   unreg-list(v-else)
 </template>
 
