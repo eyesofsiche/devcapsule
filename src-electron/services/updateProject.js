@@ -1,4 +1,5 @@
 import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
+import { updateIndexMD } from "./updateIndexMD.js";
 
 export async function updateProject({
   id,
@@ -41,6 +42,8 @@ export async function updateProject({
     envs: envs ?? existingProject?.envs ?? [],
     envPatterns: envPatterns ?? existingProject?.envPatterns ?? [],
   });
+
+  await updateIndexMD();
 }
 
 export async function excludeFolderList(folderPath) {

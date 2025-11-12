@@ -8,7 +8,7 @@ export async function content() {
   try {
     const projectsDB = await readSection("projects");
     const rows = projectsDB.map((proj) => {
-      const name = proj.name;
+      const projectName = proj.projectName;
       const id = proj.id;
       const time = new Date(proj.lastSynced).toLocaleString();
       const envFiles = [];
@@ -17,7 +17,7 @@ export async function content() {
       }
       const file = envFiles.join("<br>");
 
-      return `| \`${name}\` | ${time} | ${file} |`;
+      return `| \`${projectName}\` | ${time} | ${file} |`;
     });
     return `# 📦 DevCapsule 프로젝트 목록\n\n| 이름 | 마지막 동기화 | 링크 |\n|------|-------------|------|\n${rows.join(
       "\n"
