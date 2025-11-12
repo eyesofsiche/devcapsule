@@ -6,6 +6,7 @@ import {
   Tray,
   Menu,
   nativeImage,
+  powerMonitor,
 } from "electron";
 import windowStateKeeper from "electron-window-state";
 import os from "os";
@@ -88,7 +89,9 @@ async function createWindow() {
       } = require("electron-devtools-installer");
       installExtension(VUEJS_DEVTOOLS)
         .then((name) => {
-          console.log(`✅ Vue DevTools installed: ${name}`);
+          console.log(
+            `✅ Vue DevTools installed: ${JSON.stringify(name, 0, 2)}`
+          );
           mainWindow.webContents.openDevTools();
         })
         .catch((err) => {
@@ -107,9 +110,9 @@ async function createWindow() {
       if (!isQuitting) {
         event.preventDefault();
         mainWindow.hide();
-      }
-      if (process.platform === "darwin") {
-        app.dock.hide();
+        if (process.platform === "darwin") {
+          app.dock.hide();
+        }
       }
     });
 }
@@ -152,13 +155,21 @@ app.whenReady().then(async () => {
   tray.setToolTip("DevCapsule");
   tray.setContextMenu(contextMenu);
 
-  globalShortcut.register("CommandOrControl+Shift+I", () => {
-    if (!mainWindow.webContents.isDevToolsOpened()) {
-      mainWindow.webContents.openDevTools();
-    } else {
-      mainWindow.webContents.closeDevTools();
-    }
+  // 시스템 종료/재시작 이벤트를 감지
+  powerMonitor.on("shutdown", () => {
+    isQuitting = true;
   });
+
+  // 개발 환경에서만 전역 단축키 등록
+  if (process.env.NODE_ENV === "development") {
+    globalShortcut.register("CommandOrControl+Shift+I", () => {
+      if (!mainWindow.webContents.isDevToolsOpened()) {
+        mainWindow.webContents.openDevTools();
+      } else {
+        mainWindow.webContents.closeDevTools();
+      }
+    });
+  }
 
   const settingsDB = await readSection("settings");
   if (settingsDB.autoRefresh) {
@@ -171,6 +182,9 @@ app.on("before-quit", (event) => {
     isQuitting = true;
     return;
   }
+
+  // 사용자가 Cmd+Q를 누르거나 메뉴에서 종료를 선택한 경우만 막음
+  // 시스템 종료/재시동은 막지 않음 (app.quit()가 호출되었을 때만 isQuitting이 true)
   if (!isQuitting) {
     event.preventDefault();
     if (mainWindow) mainWindow.hide();
@@ -178,6 +192,11 @@ app.on("before-quit", (event) => {
       app.dock.hide();
     }
   }
+});
+
+// 시스템 종료 등으로 실제 종료가 확정되었을 때
+app.on("will-quit", () => {
+  globalShortcut.unregisterAll();
 });
 
 app.on("window-all-closed", () => {
