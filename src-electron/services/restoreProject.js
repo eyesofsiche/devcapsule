@@ -17,7 +17,8 @@ export async function restoreProject(projectId) {
 
     const { path: folderPath, git, envs = [] } = project;
 
-    if (!git) {
+    const gitOriginUrl = git.remotes[0]?.url || null;
+    if (!git || !gitOriginUrl) {
       return { success: false, error: "연결된 Git 저장소 정보가 없습니다." };
     }
 
@@ -25,7 +26,7 @@ export async function restoreProject(projectId) {
     const parentDir = path.dirname(folderPath);
     await fs.mkdir(parentDir, { recursive: true });
     const gitClient = simpleGit({ baseDir: parentDir });
-    await gitClient.clone(git, folderPath).catch((err) => {
+    await gitClient.clone(gitOriginUrl, folderPath).catch((err) => {
       console.error("❌ Git clone 실패:", err.message);
       throw err;
     });
