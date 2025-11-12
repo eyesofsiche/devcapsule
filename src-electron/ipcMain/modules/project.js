@@ -43,14 +43,17 @@ export default function registerProjectHandlers(mainWindow) {
       data: project,
     });
 
-    const updated = await analyzeProject(project.path);
-    updateProject({ ...updated, id });
+    // 파일이 존재하는 경우에만 분석
+    if (project.isFileExists) {
+      const updated = await analyzeProject(project.path);
+      updateProject({ ...updated, id });
 
-    // 새로운 분석 정보 전송
-    event.sender.send("event:info-project-updated", {
-      type: "updated",
-      data: updated,
-    });
+      // 새로운 분석 정보 전송
+      event.sender.send("event:info-project-updated", {
+        type: "updated",
+        data: updated,
+      });
+    }
   });
 
   ipcMain.on("cmd:info-project", async (event, { replyChannel, path }) => {

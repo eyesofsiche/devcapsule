@@ -135,6 +135,8 @@ export default {
       window.electron.invoke("cmd:info-project", {
         id: this.project.id,
       });
+
+      // 현재 프로젝트 정보 업데이트
       this.handleProjectUpdate = (data) => {
         if (data.type === "cache") {
           this.info = data.data;
