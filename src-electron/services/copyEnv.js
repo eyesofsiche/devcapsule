@@ -15,13 +15,15 @@ import { getUserDataPath } from "../utils/getPath.js";
  */
 export async function copyEnv(folderPath, projectId, envFiles = [".env"]) {
   const envsBase = path.join(getUserDataPath(), "envs");
-  const projectEnvDir = path.join(envsBase, projectId);
+  const filesDir = path.join(envsBase, "files");
+  const projectEnvDir = path.join(filesDir, projectId);
 
   const undoTasks = [];
 
   try {
     // envsBase 폴더 보장
     await fs.mkdir(envsBase, { recursive: true });
+    await fs.mkdir(filesDir, { recursive: true });
 
     // 기존 백업 디렉토리 제거 (있다면)
     if (existsSync(projectEnvDir)) {
