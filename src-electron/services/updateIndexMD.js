@@ -13,7 +13,7 @@ export async function content() {
       const time = new Date(proj.lastSynced).toLocaleString();
       const envFiles = [];
       for (const env of proj.envs) {
-        envFiles.push(`[${env} 보기](./${id}/${env})`);
+        envFiles.push(`[${env} 보기](./files/${id}/${env})`);
       }
       const file = envFiles.join("<br>");
 
