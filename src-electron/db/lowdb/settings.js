@@ -15,6 +15,7 @@ const defaultData = {
   settings: {
     autoRun: false,
     autoRefresh: false,
+    gitPath: null,
     theme: "dark",
     language: "ko",
   },
@@ -78,7 +79,7 @@ export async function read(type = "settings") {
   defaultData.settings.autoRun = isEnabled;
   if (!db.data.settings) db.data.settings = defaultData.settings;
   if (type === "settings") {
-    return db.data.settings;
+    return Object.assign(defaultData.settings, db.data.settings);
   } else if (type === "all") {
     return db.data;
   }

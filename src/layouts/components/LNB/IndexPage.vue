@@ -36,6 +36,7 @@
           dense
           @click="visibleSetting = true"
         ) 설정
+          q-badge(v-if="!settings.gitPath" rounded color="red" transparent align="bottom" floating)
 
   popup-setting(v-model="visibleSetting" @hide="visibleSetting = false")
 </template>
@@ -54,7 +55,7 @@ export default {
     ListSec,
   },
   computed: {
-    ...mapGetters(["watchs", "projects", "refresh"]),
+    ...mapGetters(["watchs", "projects", "refresh", "settings"]),
     totalProjectCount() {
       return this.watchs
         .map((item) => item.count)

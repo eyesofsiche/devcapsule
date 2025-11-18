@@ -1,82 +1,101 @@
 <template lang="pug">
 .normal-page
-  //- .text-caption 프로젝트를 찾을 폴더를 선택해 주세요.
-
-  //- q-list.q-mt-md(separator bordered)
-    q-item(
-      v-for="(path, idx) in selectedPaths"
-      :key="idx"
-      :loading="projectCounts[path]?.loading"
+  .text-caption 
+    div 프로젝트 환경 변수(.env)를 Git 저장소에 백업할 수 있습니다.
+    div.text-red.q-mt-xs.text-weight-bold ⚠️ 반드시 비공개(Private) 저장소를 사용하세요!
+  
+  .q-mt-sm.q-pa-sm.bg-grey-10.rounded-borders.text-caption
+    .text-weight-bold.q-mb-xs 📌 주요 사항
+    ul.q-pl-md.q-my-none
+      li 
+        strong devcapsule 
+        | 전용 브랜치가 자동 생성됩니다 (기존 코드와 분리)
+      li 
+        | Devcapsule에서 관리하는 파일만 백업됩니다:
+      li.text-red 그 외 파일은 동기화 시 자동 삭제되니 주의하세요
+      li Personal Access Token 또는 SSH 키 인증 필요
+      li 여러 PC 사용 시 최신 변경사항이 우선 적용됩니다
+  
+  q-form.q-mt-md.q-gutter-md(ref="postForm")
+    q-input(
+      v-model="postForm.gitPath"
+      label="Git 저장소 주소"
+      outlined
+      dense
+      :loading="loading"
+      :readonly="loading || isTest"
+      :clearable="isTest"
     )
-      q-item-section(style="min-height: 42px;")
-        q-item-label {{ path }}
-        q-item-label(caption)
-          template(v-if="projectCounts[path]?.loading")
-            span 프로젝트 찾는 중...
-          template(v-else)
-            | {{ projectCounts[path]?.count || 0 }} 프로젝트 감지됨
-        q-inner-loading(:showing="projectCounts[path]?.loading")
-          q-spinner-facebook(size="20px" color="primary")
-      q-item-section(v-if="!projectCounts[path]?.loading" side)
-        q-btn(
-          flat
-          round
-          color="negative"
-          icon="delete"
-          @click="removePath(idx)"
-        )
-
-    q-item(v-if="!selectedPaths.length")
-      q-item-section.text-grey.text-center(style="min-height: 42px;")
-        | 선택된 폴더가 없습니다.
+      template(v-if="isTest" v-slot:append)
+        q-icon.cursor-pointer(name="close" @click="clickCancelTest")
   
   Teleport(v-if="showActions" to="#right-actions")
     .row.q-gutter-x-sm
-      q-btn(
-        v-if="isEdit"
-        label="취소"
-        color="negative"
-        dense
-        unelevated
-        :disable="loading"
-        @click="clickCancel"
-      )
-      q-btn(
-        v-if="isEdit"
-        label="저장"
-        color="positive"
-        dense
-        unelevated
-        :disable="loading"
-        @click="clickSave"
-      )
-      q-btn(
-        v-else
-        label="닫기"
-        color="grey"
-        dense
-        unelevated
-        :disable="loading"
-        @click="$emit('close')"
-      )
+      template(v-if="isEdit")
+        q-btn(
+          label="취소"
+          color="negative"
+          dense
+          unelevated
+          :disable="loading"
+          @click="clickCancel"
+        )
+        q-btn(
+          v-if="isTest"
+          label="저장"
+          color="positive"
+          dense
+          unelevated
+          :disable="loading"
+          @click="clickSave"
+        )
+        q-btn(
+          v-else
+          label="TEST"
+          color="warning"
+          dense
+          unelevated
+          :disable="loading"
+          @click="clickTest"
+        )
+      template(v-else)
+        q-btn(
+          label="닫기"
+          color="grey"
+          dense
+          unelevated
+          :disable="loading"
+          @click="$emit('close')"
+        )
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
+const defaultForm = {
+  autoRun: false,
+  autoRefresh: false,
+  gitPath: "",
+  theme: "dark",
+  language: "ko",
+};
+
 export default {
   name: "GitPage",
   computed: {
+    ...mapGetters(["settings"]),
     isEdit() {
-      if (this.originPaths.length !== this.selectedPaths.length) {
-        return true;
-      }
-      return this.originPaths.some(
-        (path) => !this.selectedPaths.includes(path)
-      );
+      return !this.$_.isEqual(this.originForm, this.postForm);
     },
-    loading() {
-      return this.selectedPaths.some(
-        (path) => this.projectCounts[path]?.loading
-      );
+  },
+  watch: {
+    settings: {
+      handler(val) {
+        console.log("settings", val);
+        this.init(val);
+      },
+      deep: true,
+      immediate: true,
     },
   },
   mounted() {
@@ -86,75 +105,92 @@ export default {
   },
   data() {
     return {
-      originPaths: [],
-      selectedPaths: [],
-      projectCounts: {},
+      loading: false,
       showActions: false,
+
+      originForm: this.$_.cloneDeep(defaultForm),
+      postForm: this.$_.cloneDeep(defaultForm),
+      isTest: false,
     };
   },
   methods: {
-    async addFolder() {
-      try {
-        const result = await window.electron.selectFolder();
-        if (result) {
-          // 중복 체크
-          if (!this.selectedPaths.includes(result)) {
-            this.selectedPaths.push(result);
-            // 프로젝트 수 계산 시작
-            this.updateProjectCount(result);
-          } else {
-            // 중복된 경로 알림
+    init(val) {
+      this.originForm = this.$_.cloneDeep(val);
+      this.postForm = this.$_.cloneDeep(val);
+
+      if (this.postForm.gitPath) this.isTest = true;
+    },
+    clickCancel() {
+      this.init(this.settings);
+    },
+
+    clickCancelTest() {
+      this.originForm.gitPath = "";
+      this.isTest = false;
+    },
+
+    async clickTest() {
+      this.loading = true;
+      window.electron
+        .invokeWithReply("cmd:backup-repo-test", {
+          path: this.postForm.gitPath,
+        })
+        .then((check) => {
+          if (check.success) {
+            this.isTest = true;
             this.$q.notify({
-              type: "warning",
-              message: "이미 추가된 폴더입니다.",
-              position: "top",
+              type: "positive",
+              message: "Git 저장소 연결 테스트에 성공했습니다.",
+            });
+          } else {
+            this.isTest = false;
+            let errorMessage = "Git 저장소 연결 테스트에 실패했습니다.";
+            if (check.errorType === "GIT_NOT_FOUND") {
+              errorMessage += " Git이 시스템에서 발견되지 않습니다.";
+            } else if (check.errorType === "AUTH_FAILED") {
+              errorMessage += " 인증에 실패했습니다. 자격 증명을 확인하세요.";
+            } else {
+              errorMessage += ` 오류: ${check.error}`;
+            }
+            this.$q.notify({
+              type: "negative",
+              message: errorMessage,
             });
           }
-        }
-      } catch (e) {
-        this.$q.notify({
-          type: "negative",
-          message: "폴더 선택 중 오류가 발생했습니다.",
-          position: "top",
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      }
     },
 
-    removePath(index) {
-      const path = this.selectedPaths[index];
-      this.selectedPaths.splice(index, 1);
-      // 프로젝트 카운트 데이터도 삭제
-      delete this.projectCounts[path];
-    },
-
-    async updateProjectCount(path) {
-      // 로딩 상태 설정
-      this.projectCounts[path] = { loading: true, count: 0 };
-
-      try {
-        // 비동기로 프로젝트 수 계산 요청
-        window.electron.getProjectCount(path).then((result) => {
-          // 로딩 완료 및 결과 설정
-          this.projectCounts[path] = {
-            loading: false,
-            count: result.success ? result.count : 0,
-          };
+    async clickSave() {
+      this.loading = true;
+      window.electron
+        .invokeWithReply(
+          "cmd:backup-repo-settings",
+          {
+            path: this.postForm.gitPath,
+          },
+          60000 // 60초 타임아웃 (Git 작업은 시간이 오래 걸릴 수 있음)
+        )
+        .then(async (check) => {
+          if (check.success) {
+            await this.$store.dispatch("settings/readSettings");
+            this.$q.notify({
+              type: "positive",
+              message: "Git 저장소 설정이 저장되었습니다.",
+            });
+            this.isTest = false;
+          } else {
+            this.$q.notify({
+              type: "negative",
+              message: `Git 저장소 설정에 실패했습니다. 오류: ${check.error}`,
+            });
+          }
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      } catch (e) {
-        console.error(`프로젝트 수 계산 오류 (${path}):`, e);
-        this.projectCounts[path] = {
-          loading: false,
-          count: 0,
-        };
-      }
-    },
-
-    clickCancel() {
-      this.selectedPaths = this.originPaths;
-    },
-
-    clickSave() {
-      console.log("clickSave");
     },
   },
 };
