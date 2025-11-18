@@ -38,6 +38,7 @@ import { mapGetters } from "vuex";
 const defaultForm = {
   autoRun: false,
   autoRefresh: false,
+  gitPath: "",
   theme: "dark",
   language: "ko",
 };

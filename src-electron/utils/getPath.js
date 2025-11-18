@@ -3,6 +3,7 @@ import path from "path";
 
 export function getUserDataPath() {
   if (process.env.TEST) {
+    // return "/Users/siche/Library/Application Support/DevCapsule-dev/";
     return path.join(process.cwd(), "test/userData");
   }
   return path.join(app.getPath("appData"), __APP_NAME__);

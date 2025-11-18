@@ -4,8 +4,9 @@ import { ipcMain, dialog, shell } from "electron";
 import fs from "fs";
 import os from "os";
 
-import { readSection } from "../../db/lowdb/index.js";
+import { readSection, updateSection } from "../../db/lowdb/index.js";
 import { checkUncommittedChanges } from "../../helpers/git.js";
+import { settingGitRepo, testGitConnection } from "../../services/gitRepo.js";
 import {
   excludeFolderList,
   updateProjectFileExists,
@@ -131,6 +132,38 @@ export default function registerSettingsHandlers() {
     } catch (err) {
       console.error("❌ open-folder error:", err);
       return { success: false, error: err.message };
+    }
+  });
+
+  // 백업 저장소 세팅
+  ipcMain.on(
+    "cmd:backup-repo-settings",
+    async (event, { replyChannel, path }) => {
+      try {
+        const result = await settingGitRepo(path);
+
+        if (result.success) {
+          // gitPath 저장 ✅
+          await updateSection("settings", { gitPath: path });
+        }
+
+        event.reply(replyChannel, result);
+      } catch (err) {
+        event.reply(replyChannel, { success: false });
+      }
+    }
+  );
+
+  // 저장소 test
+  ipcMain.on("cmd:backup-repo-test", async (event, { replyChannel, path }) => {
+    try {
+      const result = await testGitConnection(path);
+      event.reply(replyChannel, result);
+    } catch (err) {
+      event.reply(replyChannel, {
+        success: false,
+        error: "알 수 없는 에러",
+      });
     }
   });
 }

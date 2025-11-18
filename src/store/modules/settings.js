@@ -3,6 +3,7 @@ import * as devalue from "devalue";
 const state = {
   autoRun: false,
   autoRefresh: false,
+  gitPath: null,
 };
 
 const mutations = {
@@ -12,15 +13,14 @@ const mutations = {
   SET_AUTO_REFRESH: (state, autoRefresh) => {
     state.autoRefresh = autoRefresh;
   },
+  SET_GIT_PATH: (state, gitPath) => {
+    state.gitPath = gitPath;
+  },
 };
 
 const actions = {
   async init({ dispatch }) {
-    const settings = await window.electron.lowdb.get("settings");
-    dispatch("setSettings", {
-      data: settings,
-      options: { save: false },
-    });
+    await dispatch("readSettings");
     await dispatch("setAllPath");
   },
   setSettings({ commit }, { data, options = { save: true } }) {
@@ -38,11 +38,20 @@ const actions = {
     }
     commit("SET_AUTO_RUN", data.autoRun);
     commit("SET_AUTO_REFRESH", data.autoRefresh);
+    commit("SET_GIT_PATH", data.gitPath);
   },
 
   async setAllPath({ dispatch }) {
     await dispatch("watchs/init", {}, { root: true });
     await dispatch("projects/init", {}, { root: true });
+  },
+
+  async readSettings({ dispatch }) {
+    const settings = await window.electron.lowdb.get("settings");
+    dispatch("setSettings", {
+      data: settings,
+      options: { save: false },
+    });
   },
 };
 
