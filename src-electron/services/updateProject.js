@@ -3,6 +3,7 @@ import path from "path";
 
 import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 import { getUserDataPath } from "../utils/getPath.js";
+import { commitAndPushEnvs } from "./gitRepo.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { readIndexMD } from "./updateIndexMD.js";
 
@@ -31,7 +32,7 @@ export async function updateProject({
     await excludeFolderList(path);
   }
 
-  await updateSection("projects", {
+  const project = {
     id,
     name: name ?? existingProject?.name ?? "no title",
     projectName:
@@ -46,9 +47,14 @@ export async function updateProject({
     git: git ?? existingProject?.git ?? "",
     envs: envs ?? existingProject?.envs ?? [],
     envPatterns: envPatterns ?? existingProject?.envPatterns ?? [],
-  });
+  };
+
+  await updateSection("projects", project);
 
   await updateIndexMD();
+
+  // Git 백업
+  await commitAndPushEnvs("Updated project: " + project.projectName);
 }
 
 export async function excludeFolderList(folderPath) {
@@ -123,7 +129,7 @@ export async function syncProjectsWithIndexMD() {
 
   // 순차적으로 DB 업데이트 (하나씩 완료 후 다음 진행)
   for (const project of updatedProjects) {
-    console.log("✅ 최종 병합 결과:", project);
+    // console.log("✅ 최종 병합 결과:", project);
     await updateSection("projects", {
       ...project,
     });

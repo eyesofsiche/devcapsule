@@ -15,6 +15,8 @@ import path from "path";
 import { initAllDB, readSection } from "./db/lowdb/index.js";
 import { prepareGitAuthScript } from "./helpers/git.js";
 import { registerAllIpcHandlers } from "./ipcMain/index.js";
+import { checkGitStatus, pullEnvs } from "./services/gitRepo.js";
+import { gitSyncManager } from "./services/gitSyncManager.js";
 import { scanner } from "./services/scanProject.js";
 import { initAllWatchers } from "./services/watchingEnv.js";
 import { getResourcesPublicPath } from "./utils/getPath.js";
@@ -89,9 +91,9 @@ async function createWindow() {
       } = require("electron-devtools-installer");
       installExtension(VUEJS_DEVTOOLS)
         .then((name) => {
-          console.log(
-            `✅ Vue DevTools installed: ${JSON.stringify(name, 0, 2)}`
-          );
+          // console.log(
+          //   `✅ Vue DevTools installed: ${JSON.stringify(name, 0, 2)}`
+          // );
           mainWindow.webContents.openDevTools();
         })
         .catch((err) => {
@@ -174,6 +176,16 @@ app.whenReady().then(async () => {
   const settingsDB = await readSection("settings");
   if (settingsDB.autoRefresh) {
     scanner.startAuto();
+  }
+  if (settingsDB.gitPath !== null) {
+    // 최초 체크 & Pull
+    const gitCheck = await checkGitStatus();
+    if (gitCheck.hasChanges) {
+      await pullEnvs();
+    }
+
+    // 주기적 동기화 시작 (5분마다)
+    gitSyncManager.start();
   }
 });
 

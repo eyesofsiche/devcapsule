@@ -13,7 +13,7 @@ const ignoreWatchers = new Map();
 
 export async function initAllWatchers() {
   const projects = await readSection("projects");
-  console.log(projects);
+  // console.log(projects);
   if (!projects || projects.length === 0) return;
   for (const project of projects) {
     addProjectWatcher(project);
