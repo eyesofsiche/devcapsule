@@ -3,6 +3,7 @@ import path from "path";
 
 import { readSection, removeSection } from "../db/lowdb";
 import { getUserDataPath } from "../utils/getPath.js";
+import { commitAndPushEnvs } from "./gitRepo.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { removeProjectWatcher } from "./watchingEnv.js";
 
@@ -36,6 +37,9 @@ export async function removeProject(id) {
       };
     }
     await updateIndexMD();
+
+    // Git 백업
+    await commitAndPushEnvs("Removed project: " + project.projectName);
   }
   return {
     success: del,

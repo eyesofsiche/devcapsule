@@ -6,6 +6,7 @@ import path from "path";
 import { removeSection } from "../db/lowdb/index.js";
 import { analyzeProject } from "../helpers/analyzeProject.js";
 import { copyEnv } from "./copyEnv.js";
+import { commitAndPushEnvs } from "./gitRepo.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { updateProject } from "./updateProject.js";
 import { addProjectWatcher } from "./watchingEnv.js";
@@ -73,6 +74,9 @@ export async function registerProject(folderPath, projectName = "no title") {
 
   // index.md 파일 업데이트
   await updateIndexMD();
+
+  // Git 백업
+  await commitAndPushEnvs("Registered project: " + projectName);
 
   return {
     success: true,
