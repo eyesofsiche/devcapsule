@@ -5,6 +5,7 @@ import path from "path";
 import simpleGit from "simple-git";
 
 import { getUserDataPath } from "../utils/getPath.js";
+import { checkGitRemoteConnection } from "../utils/networkCheck.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { syncProjectsFromDB } from "./updateProject.js";
 
@@ -336,7 +337,18 @@ export async function commitAndPushEnvs(message = "Update envs") {
 
     const git = simpleGit({ baseDir: envsBase });
 
-    // 현재 브랜치 확인 (안전장치)
+    // 네트워크 연결 확인
+    const isOnline = await checkGitRemoteConnection(git, DEVCAPSULE_BRANCH);
+    if (!isOnline) {
+      console.log("⚠️ 오프라인 모드 - Git 작업 스킵");
+      return {
+        success: false,
+        offline: true,
+        message: "네트워크 연결이 없습니다. 온라인일 때 자동으로 동기화됩니다.",
+      };
+    }
+
+    // 🔐 현재 브랜치 확인 (안전장치)
     await currentBranchCheck(git);
 
     // Pull 먼저 (원격 최신 상태 확보)
@@ -444,6 +456,17 @@ export async function pullEnvs() {
     }
 
     const git = simpleGit({ baseDir: envsBase });
+
+    // 네트워크 연결 확인
+    const isOnline = await checkGitRemoteConnection(git, DEVCAPSULE_BRANCH);
+    if (!isOnline) {
+      console.log("⚠️ 오프라인 모드 - Git 작업 스킵");
+      return {
+        success: false,
+        offline: true,
+        message: "네트워크 연결이 없습니다. 온라인일 때 자동으로 동기화됩니다.",
+      };
+    }
 
     // 현재 브랜치 확인 (안전장치)
     await currentBranchCheck(git);
