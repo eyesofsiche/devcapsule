@@ -35,7 +35,7 @@ q-page(:class="!project ? 'flex flex-center' : ''")
               color="light-green"
               round
               dense
-              @click="clickRestore"
+              @click="visibleRestore = true"
             )
           .col.flex.q-gutter-sm.justify-end(v-if="project?.isFileExists")
             q-btn(
@@ -77,7 +77,9 @@ q-page(:class="!project ? 'flex flex-center' : ''")
               | Git 정보
             label-value(label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
             label-value(v-if="info?.git?.remotes.length > 0" label="remote" :value="remotes" :width="labelWidth")
-            label-value(label="마지막 커밋" :value="info?.git?.lastCommit.message" :width="labelWidth")
+            label-value(label="마지막 커밋" :value="info?.git?.lastCommit?.message" :width="labelWidth")
+
+  popup-restore(v-model="visibleRestore" :project="info" @hide="visibleRestore = false" @restored="fetchProject")
 </template>
 
 <script>
@@ -86,6 +88,7 @@ import { mapGetters } from "vuex";
 import ProjectMenu from "@/components/ContextMenu/ProjectMenu.vue";
 import FlatInput from "@/components/Form/FlatInput.vue";
 import LabelValue from "@/components/Form/LabelValue.vue";
+import PopupRestore from "@/components/Popup/Restore/IndexPage.vue";
 
 export default {
   name: "ProjectPage",
@@ -93,6 +96,7 @@ export default {
     FlatInput,
     LabelValue,
     ProjectMenu,
+    PopupRestore,
   },
   computed: {
     ...mapGetters(["projects"]),
@@ -126,6 +130,7 @@ export default {
       labelWidth: "130px",
       info: null,
       projectName: "",
+      visibleRestore: false,
     };
   },
   methods: {
@@ -185,44 +190,6 @@ export default {
             });
             this.projectName = this.project.projectName;
           }
-        });
-    },
-
-    clickRestore() {
-      this.$q
-        .dialog({
-          title: "프로젝트 복원",
-          message: "프로젝트를 복원하시겠습니까?",
-          cancel: true,
-          persistent: true,
-        })
-        .onOk(async () => {
-          const result = await window.electron.selectFolder();
-          console.log("result", result);
-          // this.$q.loading.show({
-          //   message: "프로젝트 복원 중...",
-          // });
-          // window.electron
-          //   .restoreProject(this.project.id)
-          //   .then((result) => {
-          //     const { success, error } = result;
-          //     if (success) {
-          //       this.$q.notify({
-          //         type: "positive",
-          //         message: "프로젝트가 복원되었습니다.",
-          //       });
-          //       this.fetchProject();
-          //     } else {
-          //       this.$q.notify({
-          //         type: "negative",
-          //         message: error || "프로젝트 복원에 실패했습니다.",
-          //       });
-          //     }
-          //   })
-          //   .finally(() => {
-          //     this.$store.dispatch("settings/setAllPath");
-          //     this.$q.loading.hide();
-          //   });
         });
     },
     async clickOpenFinder() {

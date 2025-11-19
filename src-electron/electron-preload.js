@@ -59,9 +59,9 @@ contextBridge.exposeInMainWorld("electron", {
   },
   manualRefresh: () => ipcRenderer.invoke("cmd:manual-refresh"),
 
-  selectFolder: async () => {
+  selectFolder: async (path) => {
     try {
-      return await ipcRenderer.invoke("dialog:select-directory");
+      return await ipcRenderer.invoke("dialog:select-directory", path);
     } catch (error) {
       console.error("폴더 선택 에러:", error);
       throw error;
@@ -82,8 +82,8 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.invoke("cmd:open-terminal", folderPath),
   removeFolder: (folderPath) =>
     ipcRenderer.invoke("cmd:remove-folder", folderPath),
-  restoreProject: (projectId) =>
-    ipcRenderer.invoke("cmd:restore-project", projectId),
+  restoreProject: (arg) =>
+    ipcRenderer.invoke("cmd:restore-project", { ...arg }),
 
   onPush: (channel, listener) => {
     // 보안을 위해 허용할 채널을 제한할 수도 있어요

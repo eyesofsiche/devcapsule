@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { ipcMain, dialog, shell } from "electron";
 import fs from "fs";
 import os from "os";
+import path from "path";
 
 import { readSection, updateSection } from "../../db/lowdb/index.js";
 import { checkUncommittedChanges } from "../../helpers/git.js";
@@ -27,11 +28,54 @@ export default function registerSettingsHandlers() {
     }
   });
 
-  // 탐색기
-  ipcMain.handle("dialog:select-directory", async () => {
+  // 탐색기 (스마트 경로 fallback)
+  ipcMain.handle("dialog:select-directory", async (event, requestedPath) => {
+    let defaultPath = requestedPath;
+
+    // 1️⃣ 요청 경로가 존재하는지 체크
+    if (requestedPath) {
+      try {
+        const stats = fs.statSync(requestedPath);
+        if (!stats.isDirectory()) {
+          defaultPath = null; // 파일이면 무시
+        }
+      } catch (err) {
+        // 2️⃣ 경로가 없으면 부모 디렉토리들을 순회하며 체크
+        const parts = requestedPath.split(/[/\\]/);
+        let foundPath = null;
+
+        for (let i = parts.length - 1; i > 0; i--) {
+          const testPath = parts.slice(0, i).join("/");
+          try {
+            const stats = fs.statSync(testPath);
+            if (stats.isDirectory()) {
+              foundPath = testPath;
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+
+        // 3️⃣ 부모도 없으면 OS 기본 경로로 fallback
+        if (foundPath) {
+          defaultPath = foundPath;
+        } else {
+          // 크로스 플랫폼 기본 경로 (Documents)
+          defaultPath = path.join(os.homedir(), "Documents");
+        }
+      }
+    } else {
+      // 경로가 없으면 Documents
+      defaultPath = path.join(os.homedir(), "Documents");
+    }
+
     const result = await dialog.showOpenDialog({
-      properties: ["openDirectory"],
+      properties: ["openDirectory", "createDirectory"],
+      defaultPath: defaultPath,
+      buttonLabel: "복원 위치 선택",
     });
+
     return result.filePaths[0];
   });
 
