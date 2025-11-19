@@ -42,7 +42,7 @@ q-page(:class="!path ? 'flex flex-center' : ''")
               | Git 정보
             label-value(label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
             label-value(v-if="info?.git?.remotes.length > 0" label="remote" :value="remotes" :width="labelWidth")
-            label-value(label="마지막 커밋" :value="info?.git?.lastCommit.message" :width="labelWidth")
+            label-value(label="마지막 커밋" :value="info?.git?.lastCommit?.message" :width="labelWidth")
 </template>
 
 <script>

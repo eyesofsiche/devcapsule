@@ -99,7 +99,7 @@ export default function registerProjectHandlers(mainWindow) {
     }
   });
 
-  ipcMain.handle("cmd:restore-project", async (_, projectId) => {
-    return await restoreProject(projectId);
+  ipcMain.handle("cmd:restore-project", async (_, { projectId, clonePath }) => {
+    return await restoreProject(projectId, clonePath);
   });
 }
