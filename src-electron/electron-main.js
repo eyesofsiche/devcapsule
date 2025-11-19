@@ -20,6 +20,7 @@ import { gitSyncManager } from "./services/gitSyncManager.js";
 import { scanner } from "./services/scanProject.js";
 import { initAllWatchers } from "./services/watchingEnv.js";
 import { getResourcesPublicPath } from "./utils/getPath.js";
+import { checkNetworkConnection } from "./utils/networkCheck.js";
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -177,16 +178,50 @@ app.whenReady().then(async () => {
   if (settingsDB.autoRefresh) {
     scanner.startAuto();
   }
-  if (settingsDB.gitPath !== null) {
-    // 최초 체크 & Pull
-    const gitCheck = await checkGitStatus();
-    if (gitCheck.hasChanges) {
-      await pullEnvs();
+
+  // Git 동기화 초기화 (오프라인이면 최대 5번 재시도)
+  let networkRetryCount = 0;
+  const MAX_NETWORK_RETRIES = 5; // 총 5번 시도
+  const RETRY_INTERVAL = 5 * 60 * 1000; // 5분
+
+  const initializeGitSync = async () => {
+    // Git 설정이 없으면 체크 안 함
+    if (!settingsDB.gitPath) {
+      console.log("⚠️ Git 저장소 미설정 - 동기화 스킵");
+      return;
     }
 
-    // 주기적 동기화 시작 (5분마다)
-    gitSyncManager.start();
-  }
+    const isOnline = await checkNetworkConnection();
+    console.log(
+      `🌐 네트워크 상태: ${isOnline ? "온라인" : "오프라인"} (시도 ${
+        networkRetryCount + 1
+      }/${MAX_NETWORK_RETRIES})`
+    );
+
+    if (isOnline) {
+      // ✅ 온라인: Git 초기 동기화 & 주기적 체크 시작
+      const gitCheck = await checkGitStatus();
+      if (gitCheck.hasChanges) {
+        await pullEnvs();
+      }
+
+      gitSyncManager.start();
+      console.log("✅ Git 동기화 시작");
+    } else {
+      // ❌ 오프라인: 재시도 또는 포기
+      networkRetryCount += 1;
+
+      if (networkRetryCount < MAX_NETWORK_RETRIES) {
+        console.log(`⏳ ${RETRY_INTERVAL / 1000 / 60}분 후 재시도...`);
+        setTimeout(initializeGitSync, RETRY_INTERVAL);
+      } else {
+        console.log("⚠️ 오프라인 모드로 전환 (5번 시도 실패)");
+        // TODO: UI에 오프라인 상태 알림
+      }
+    }
+  };
+
+  initializeGitSync();
 });
 
 app.on("before-quit", (event) => {
