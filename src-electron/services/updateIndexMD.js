@@ -4,9 +4,8 @@ import path from "path";
 import { readSection } from "../db/lowdb";
 import { getUserDataPath } from "../utils/getPath.js";
 
-export async function content() {
+export async function content(projectsDB) {
   try {
-    const projectsDB = await readSection("projects");
     const rows = projectsDB.map((proj) => {
       const projectName = proj.projectName;
       const id = proj.id;
@@ -29,8 +28,30 @@ export async function content() {
 }
 
 export async function updateIndexMD() {
+  const projectsDB = await readSection("projects");
   const indexPath = path.join(getUserDataPath(), "envs/index.md");
-  await fs.writeFile(indexPath, await content(), "utf8");
+  await fs.writeFile(indexPath, await content(projectsDB), "utf8");
+
+  const projectsPath = path.join(getUserDataPath(), "envs/db/projects.json");
+  await fs.mkdir(path.dirname(projectsPath), { recursive: true });
+  const projectList = projectsDB.map((project) => {
+    const git = {
+      remotes: project.git?.remotes || [],
+    };
+    return {
+      id: project.id,
+      name: project.name,
+      projectName: project.projectName,
+      lastSynced: project.lastSynced,
+      git,
+      envs: project.envs,
+    };
+  });
+  await fs.writeFile(
+    projectsPath,
+    JSON.stringify(projectList, null, 2),
+    "utf8"
+  );
 }
 
 export async function readIndexMD() {

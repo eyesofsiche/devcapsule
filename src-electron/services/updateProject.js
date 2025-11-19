@@ -7,19 +7,22 @@ import { commitAndPushEnvs } from "./gitRepo.js";
 import { updateIndexMD } from "./updateIndexMD.js";
 import { readIndexMD } from "./updateIndexMD.js";
 
-export async function updateProject({
-  id,
-  name,
-  projectName,
-  path,
-  version,
-  description,
-  license,
-  size,
-  git,
-  envs,
-  envPatterns,
-}) {
+export async function updateProject(
+  {
+    id,
+    name,
+    projectName,
+    path,
+    version,
+    description,
+    license,
+    size,
+    git,
+    envs,
+    envPatterns,
+  },
+  sync = true
+) {
   if (!id) {
     throw new Error("Project id is required.");
   }
@@ -51,8 +54,8 @@ export async function updateProject({
 
   await updateSection("projects", project);
 
+  if (!sync) return;
   await updateIndexMD();
-
   // Git 백업
   await commitAndPushEnvs("Updated project: " + project.projectName);
 }
@@ -196,5 +199,86 @@ export async function syncProjectsFromFiles() {
     console.log(`✅ ${missingProjects.length}개 프로젝트 DB 추가 완료`);
   } catch (err) {
     console.error("❌ syncProjectsFromFiles 실패:", err);
+  }
+}
+
+// Git에서 받은 db/projects.json으로 로컬 DB 동기화
+export async function syncProjectsFromDB() {
+  try {
+    const envsBase = path.join(getUserDataPath(), "envs");
+    const dbFilePath = path.join(envsBase, "db", "projects.json");
+
+    // db/projects.json 파일 존재 확인
+    try {
+      await fs.access(dbFilePath);
+    } catch {
+      console.log("📍 envs/db/projects.json 없음 - 건너뛰기");
+      return;
+    }
+
+    // Git 백업 DB 읽기
+    const fileContent = await fs.readFile(dbFilePath, "utf8");
+    const gitProjects = JSON.parse(fileContent);
+
+    // 로컬 DB 읽기
+    const localProjects = await readSection("projects");
+
+    // Git DB를 기준으로 병합
+    const gitProjectsMap = new Map(gitProjects.map((p) => [p.id, p]));
+    const localProjectsMap = new Map(localProjects.map((p) => [p.id, p]));
+
+    const mergedProjects = [];
+
+    // 1. Git DB에 있는 모든 프로젝트 처리
+    for (const [id, gitProject] of gitProjectsMap.entries()) {
+      const localProject = localProjectsMap.get(id);
+
+      if (localProject) {
+        // 둘 다 있음 → Git 데이터로 업데이트 (git, envs 우선)
+        console.log(`🔄 업데이트: ${gitProject.projectName}`);
+        mergedProjects.push({
+          ...localProject, // 로컬 데이터 (path, isFileExists 등)
+          projectName: gitProject.projectName, // Git 우선
+          name: gitProject.name || localProject.name,
+          lastSynced: gitProject.lastSynced, // Git 타임스탬프
+          git: gitProject.git, // Git 정보 (중요!)
+          envs: gitProject.envs, // Git의 .env 목록
+        });
+        localProjectsMap.delete(id); // 처리 완료
+      } else {
+        // Git에만 있음 → 새 프로젝트 추가
+        console.log(`➕ 새 프로젝트 추가: ${gitProject.projectName}`);
+        mergedProjects.push({
+          id: gitProject.id,
+          name: gitProject.name,
+          projectName: gitProject.projectName,
+          path: "", // 로컬 경로 없음 (나중에 복구 시 지정)
+          lastSynced: gitProject.lastSynced,
+          isFileExists: false, // 아직 로컬에 clone 안됨
+          version: null,
+          description: null,
+          license: null,
+          size: null,
+          git: gitProject.git, // Git 정보 복원!
+          envs: gitProject.envs,
+          envPatterns: [],
+        });
+      }
+    }
+
+    // 2. 로컬에만 있는 프로젝트 (Git 백업 안된 것) → 유지
+    for (const [id, localProject] of localProjectsMap.entries()) {
+      console.log(`📍 로컬 전용: ${localProject.projectName}`);
+      mergedProjects.push(localProject);
+    }
+
+    // 3. DB 업데이트
+    for (const project of mergedProjects) {
+      await updateSection("projects", project);
+    }
+
+    console.log(`✅ ${gitProjects.length}개 프로젝트 동기화 완료`);
+  } catch (err) {
+    console.error("❌ syncProjectsFromDB 실패:", err);
   }
 }

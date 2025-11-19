@@ -46,7 +46,7 @@ export default function registerProjectHandlers(mainWindow) {
     // 파일이 존재하는 경우에만 분석
     if (project.isFileExists) {
       const updated = await analyzeProject(project.path);
-      updateProject({ ...updated, id });
+      updateProject({ ...updated, id }, false);
 
       // 새로운 분석 정보 전송
       event.sender.send("event:info-project-updated", {

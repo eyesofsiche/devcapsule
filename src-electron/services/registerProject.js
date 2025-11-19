@@ -67,7 +67,7 @@ export async function registerProject(folderPath, projectName = "no title") {
   };
 
   // local DB 등록
-  await updateProject(project);
+  await updateProject(project, false);
 
   // watcher 등록
   addProjectWatcher(project);
