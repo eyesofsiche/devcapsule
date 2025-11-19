@@ -222,12 +222,10 @@ export async function settingGitRepo(gitPath) {
     );
 
     if (!hasDevCapsuleBranch) {
-      // 원격에 devcapsule 브랜치 없음 - 로컬 데이터로 새로 생성
-      console.log(`📍 ${DEVCAPSULE_BRANCH} orphan 브랜치 생성 (로컬 → 원격)`);
+      // 원격에 devcapsule 브랜치 없음 - 로컬 데이터를 원격으로 Push
+      console.log(`📍 ${DEVCAPSULE_BRANCH} 브랜치 Push (로컬 → 원격)`);
 
-      await git.raw(["checkout", "--orphan", DEVCAPSULE_BRANCH]);
-      await git.raw(["rm", "-rf", "."]).catch(() => {});
-
+      // 이미 devcapsule 브랜치에 있으므로 바로 add & commit & push
       await git.add(".");
       await git.commit("Initial DevCapsule envs backup", {
         "--allow-empty": null,
