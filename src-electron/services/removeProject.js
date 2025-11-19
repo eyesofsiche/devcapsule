@@ -48,7 +48,7 @@ export async function removeProject(id) {
 
 async function deleteProjectEnv(id) {
   const envsBase = path.join(getUserDataPath(), "envs");
-  const projectEnvDir = path.join(envsBase, id);
+  const projectEnvDir = path.join(envsBase, "files", id);
   try {
     await rm(projectEnvDir, { recursive: true, force: true });
     return true;
