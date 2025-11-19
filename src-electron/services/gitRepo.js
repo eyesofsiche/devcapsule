@@ -6,13 +6,10 @@ import simpleGit from "simple-git";
 
 import { getUserDataPath } from "../utils/getPath.js";
 import { updateIndexMD } from "./updateIndexMD.js";
-import {
-  syncProjectsWithIndexMD,
-  syncProjectsFromFiles,
-} from "./updateProject.js";
+import { syncProjectsFromDB } from "./updateProject.js";
 
 // DevCapsule 전용 파일 패턴
-const ALLOWED_PATTERNS = ["index.md", "files"];
+const ALLOWED_PATTERNS = [".git", "db", "index.md", "files"];
 // DevCapsule 전용 브랜치명
 const DEVCAPSULE_BRANCH = "devcapsule";
 
@@ -65,8 +62,8 @@ async function cleanUnauthorizedFiles(envsBase) {
 
   for (const entry of entries) {
     const name = entry.name;
-    // .git, index.md, files 폴더만 허용
-    if (name === ".git" || ALLOWED_PATTERNS.includes(name)) {
+    // 허용된 파일/폴더만 유지
+    if (ALLOWED_PATTERNS.includes(name)) {
       continue;
     }
 
@@ -85,10 +82,14 @@ async function resolveConflicts(git, envsBase) {
   console.log(`📍 충돌 파일: ${status.conflicted.join(", ")}`);
 
   for (const file of status.conflicted) {
-    if (file === "index.md") {
-      // index.md: 타임스탬프 기반 병합
-      console.log("⚠️ index.md 충돌 - 타임스탬프 기반 병합");
-      await mergeIndexMD(git, envsBase);
+    if (file === "db/projects.json") {
+      // db/projects.json: 타임스탬프 기반 병합 (가장 중요!)
+      console.log("⚠️ db/projects.json 충돌 - 타임스탬프 기반 병합");
+      await mergeProjectsDB(git, envsBase);
+    } else if (file === "index.md") {
+      // index.md: 로컬 버전 (나중에 DB 기준으로 재생성됨)
+      console.log("⚠️ index.md 충돌 - 로컬 유지 (DB 기준 재생성 예정)");
+      await git.raw(["checkout", "--ours", file]);
     } else if (file.startsWith("files/")) {
       // .env 파일: 원격 우선 (다른 PC가 최신)
       console.log(`⚠️ ${file} 충돌 - 원격 버전 선택 (최신)`);
@@ -101,23 +102,23 @@ async function resolveConflicts(git, envsBase) {
   }
 
   await git.add(".");
-  await git.commit("Resolve conflicts: merge index.md, use remote for files");
+  await git.commit("Resolve conflicts: merge db/projects.json");
   console.log("✅ 충돌 해결 완료");
 }
 
-// index.md 병합: 타임스탬프 기반
-async function mergeIndexMD(git, envsBase) {
+// db/projects.json 병합: 타임스탬프 기반
+async function mergeProjectsDB(git, envsBase) {
   try {
-    // 1. 로컬 index.md (현재 작업 중)
-    const localIndexPath = path.join(envsBase, "index.md");
-    const localContent = await fs.readFile(localIndexPath, "utf8");
-    const localProjects = await parseIndexMD(localContent);
+    // 1. 로컬 db/projects.json
+    const localDBPath = path.join(envsBase, "db", "projects.json");
+    const localContent = await fs.readFile(localDBPath, "utf8");
+    const localProjects = JSON.parse(localContent);
 
-    // 2. 원격 index.md (origin/devcapsule)
+    // 2. 원격 db/projects.json
     const remoteContent = await git.show([
-      `origin/${DEVCAPSULE_BRANCH}:index.md`,
+      `origin/${DEVCAPSULE_BRANCH}:db/projects.json`,
     ]);
-    const remoteProjects = await parseIndexMD(remoteContent);
+    const remoteProjects = JSON.parse(remoteContent);
 
     // 3. 타임스탬프 기반 병합
     const mergedMap = new Map();
@@ -133,6 +134,7 @@ async function mergeIndexMD(git, envsBase) {
       if (!existing) {
         // 원격에만 있음 → 추가
         mergedMap.set(proj.id, proj);
+        console.log(`  → ${proj.projectName}: 원격 프로젝트 추가`);
       } else {
         // 둘 다 있음 → 타임스탬프 비교
         const localTime = new Date(existing.lastSynced).getTime();
@@ -151,76 +153,31 @@ async function mergeIndexMD(git, envsBase) {
       }
     }
 
-    // 4. DB 업데이트 (syncProjectsWithIndexMD 활용)
+    // 4. 병합된 데이터로 db/projects.json 재생성
     const mergedProjects = Array.from(mergedMap.values());
-    await syncProjectsWithIndexMD(mergedProjects);
+    await fs.writeFile(
+      localDBPath,
+      JSON.stringify(mergedProjects, null, 2),
+      "utf8"
+    );
 
-    // 5. 병합된 데이터로 index.md 재생성
-    await updateIndexMD();
-
-    // 6. 충돌 해결 완료 표시
-    await git.add("index.md");
+    // 5. 충돌 해결 완료 표시
+    await git.add("db/projects.json");
 
     console.log(
-      `✅ index.md 병합 완료 (총 ${mergedProjects.length}개 프로젝트)`
+      `✅ db/projects.json 병합 완료 (총 ${mergedProjects.length}개 프로젝트)`
     );
   } catch (err) {
-    console.error("❌ index.md 병합 실패:", err);
+    console.error("❌ db/projects.json 병합 실패:", err);
     // 실패 시 원격 우선으로 fallback
-    await git.raw(["checkout", "--theirs", "index.md"]);
+    await git.raw(["checkout", "--theirs", "db/projects.json"]);
   }
 }
 
-// Markdown 파싱 (readIndexMD와 동일한 로직)
-async function parseIndexMD(content) {
-  const lines = content.split("\n");
-  const projects = [];
-  let inTable = false;
-
-  for (const line of lines) {
-    if (line.startsWith("|---") || line.startsWith("| ---")) {
-      inTable = true;
-      continue;
-    }
-
-    if (inTable && line.startsWith("|")) {
-      const columns = line
-        .split("|")
-        .map((col) => col.trim())
-        .filter((col) => col);
-
-      if (columns.length >= 2) {
-        const projectName = columns[0].replace(/`/g, "").trim();
-        const id = columns[1].replace(/`/g, "").trim();
-        const lastSynced =
-          columns.length >= 3 && columns[2]
-            ? new Date(columns[2]).toISOString()
-            : new Date().toISOString();
-
-        const envs = [];
-        if (columns.length >= 4 && columns[3]) {
-          const linkPattern = /\[(.+?)\s보기\]\(\.\/files\/[^\/]+\/([^)]+)\)/g;
-          let match;
-          while ((match = linkPattern.exec(columns[3])) !== null) {
-            envs.push(match[2]);
-          }
-        }
-
-        if (projectName && id) {
-          projects.push({ id, projectName, envs, lastSynced });
-        }
-      }
-    }
-  }
-
-  return projects;
-}
-
-// 동기화 작업: index.md ↔ DB ↔ files/
+// 동기화 작업: db/projects.json → DB → index.md
 async function syncLocalData() {
-  await syncProjectsWithIndexMD(); // index.md → DB
-  await syncProjectsFromFiles(); // files/ → DB
-  await updateIndexMD(); // DB → index.md
+  await syncProjectsFromDB(); // envs/db/projects.json → DB (최우선!)
+  await updateIndexMD(); // DB → index.md (DB 기준으로 재생성)
 }
 
 // Git 저장소 설정 및 원격과 동기화

@@ -30,7 +30,7 @@ q-page(:class="!project ? 'flex flex-center' : ''")
         .action-btns.row.justify-between
           .col.q-gutter-sm
             q-btn(
-              v-if="!project?.isFileExists"
+              v-if="!project?.isFileExists && project?.git?.remotes.length > 0"
               icon="mdi-backup-restore"
               color="light-green"
               round
@@ -63,7 +63,7 @@ q-page(:class="!project ? 'flex flex-center' : ''")
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
             | 기본정보
-          label-value(label="경로" :value="info?.path" :width="labelWidth")
+          label-value(v-if="info?.path" label="경로" :value="info?.path" :width="labelWidth")
           label-value(label="이름" :value="info?.name" :width="labelWidth")
           label-value(v-if="info?.version" label="버전" :value="info?.version" :width="labelWidth")
           label-value(v-if="info?.description" label="설명" :value="info?.description" :width="labelWidth")
@@ -196,31 +196,33 @@ export default {
           cancel: true,
           persistent: true,
         })
-        .onOk(() => {
-          this.$q.loading.show({
-            message: "프로젝트 복원 중...",
-          });
-          window.electron
-            .restoreProject(this.project.id)
-            .then((result) => {
-              const { success, error } = result;
-              if (success) {
-                this.$q.notify({
-                  type: "positive",
-                  message: "프로젝트가 복원되었습니다.",
-                });
-                this.fetchProject();
-              } else {
-                this.$q.notify({
-                  type: "negative",
-                  message: error || "프로젝트 복원에 실패했습니다.",
-                });
-              }
-            })
-            .finally(() => {
-              this.$store.dispatch("settings/setAllPath");
-              this.$q.loading.hide();
-            });
+        .onOk(async () => {
+          const result = await window.electron.selectFolder();
+          console.log("result", result);
+          // this.$q.loading.show({
+          //   message: "프로젝트 복원 중...",
+          // });
+          // window.electron
+          //   .restoreProject(this.project.id)
+          //   .then((result) => {
+          //     const { success, error } = result;
+          //     if (success) {
+          //       this.$q.notify({
+          //         type: "positive",
+          //         message: "프로젝트가 복원되었습니다.",
+          //       });
+          //       this.fetchProject();
+          //     } else {
+          //       this.$q.notify({
+          //         type: "negative",
+          //         message: error || "프로젝트 복원에 실패했습니다.",
+          //       });
+          //     }
+          //   })
+          //   .finally(() => {
+          //     this.$store.dispatch("settings/setAllPath");
+          //     this.$q.loading.hide();
+          //   });
         });
     },
     async clickOpenFinder() {
