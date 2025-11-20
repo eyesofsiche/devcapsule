@@ -6,11 +6,11 @@ import simpleGit from "simple-git";
 
 import { getUserDataPath } from "../utils/getPath.js";
 import { checkGitRemoteConnection } from "../utils/networkCheck.js";
-import { updateIndexMD } from "./updateIndexMD.js";
 import { syncProjectsFromDB } from "./updateProject.js";
+import { updateReadmeMD } from "./updateReadmeMD.js";
 
 // DevCapsule 전용 파일 패턴
-const ALLOWED_PATTERNS = [".git", "db", "index.md", "files"];
+const ALLOWED_PATTERNS = [".git", "db", "README.md", "files"];
 // DevCapsule 전용 브랜치명
 const DEVCAPSULE_BRANCH = "devcapsule";
 
@@ -87,9 +87,9 @@ async function resolveConflicts(git, envsBase) {
       // db/projects.json: 타임스탬프 기반 병합 (가장 중요!)
       console.log("⚠️ db/projects.json 충돌 - 타임스탬프 기반 병합");
       await mergeProjectsDB(git, envsBase);
-    } else if (file === "index.md") {
-      // index.md: 로컬 버전 (나중에 DB 기준으로 재생성됨)
-      console.log("⚠️ index.md 충돌 - 로컬 유지 (DB 기준 재생성 예정)");
+    } else if (file === "README.md") {
+      // README.md: 로컬 버전 (나중에 DB 기준으로 재생성됨)
+      console.log("⚠️ README.md 충돌 - 로컬 유지 (DB 기준 재생성 예정)");
       await git.raw(["checkout", "--ours", file]);
     } else if (file.startsWith("files/")) {
       // .env 파일: 원격 우선 (다른 PC가 최신)
@@ -175,10 +175,10 @@ async function mergeProjectsDB(git, envsBase) {
   }
 }
 
-// 동기화 작업: db/projects.json → DB → index.md
+// 동기화 작업: db/projects.json → DB → README.md
 async function syncLocalData() {
   await syncProjectsFromDB(); // envs/db/projects.json → DB (최우선!)
-  await updateIndexMD(); // DB → index.md (DB 기준으로 재생성)
+  await updateReadmeMD(); // DB → README.md (DB 기준으로 재생성)
 }
 
 // Git 저장소 설정 및 원격과 동기화

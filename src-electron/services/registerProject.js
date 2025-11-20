@@ -7,8 +7,8 @@ import { removeSection } from "../db/lowdb/index.js";
 import { analyzeProject } from "../helpers/analyzeProject.js";
 import { copyEnv } from "./copyEnv.js";
 import { commitAndPushEnvs } from "./gitRepo.js";
-import { updateIndexMD } from "./updateIndexMD.js";
 import { updateProject } from "./updateProject.js";
+import { updateReadmeMD } from "./updateReadmeMD.js";
 import { addProjectWatcher } from "./watchingEnv.js";
 
 /**
@@ -72,8 +72,8 @@ export async function registerProject(folderPath, projectName = "no title") {
   // watcher 등록
   addProjectWatcher(project);
 
-  // index.md 파일 업데이트
-  await updateIndexMD();
+  // README.md 파일 업데이트
+  await updateReadmeMD();
 
   // Git 백업
   await commitAndPushEnvs("Registered project: " + projectName);
