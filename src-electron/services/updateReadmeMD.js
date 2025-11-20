@@ -22,15 +22,15 @@ export async function content(projectsDB) {
       "\n"
     )}\n`;
   } catch (error) {
-    console.error("Error in updateIndexMD:", error);
+    console.error("Error in updateReadmeMD:", error);
     return "# 📦 DevCapsule 프로젝트 목록\n\n오류 발생: " + error.message;
   }
 }
 
-export async function updateIndexMD() {
+export async function updateReadmeMD() {
   const projectsDB = await readSection("projects");
-  const indexPath = path.join(getUserDataPath(), "envs/index.md");
-  await fs.writeFile(indexPath, await content(projectsDB), "utf8");
+  const readmePath = path.join(getUserDataPath(), "envs/README.md");
+  await fs.writeFile(readmePath, await content(projectsDB), "utf8");
 
   const projectsPath = path.join(getUserDataPath(), "envs/db/projects.json");
   await fs.mkdir(path.dirname(projectsPath), { recursive: true });
@@ -54,10 +54,10 @@ export async function updateIndexMD() {
   );
 }
 
-export async function readIndexMD() {
+export async function readReadmeMD() {
   try {
-    const indexPath = path.join(getUserDataPath(), "envs/index.md");
-    const content = await fs.readFile(indexPath, "utf8");
+    const readmePath = path.join(getUserDataPath(), "envs/README.md");
+    const content = await fs.readFile(readmePath, "utf8");
 
     // Markdown 테이블 파싱
     const lines = content.split("\n");
@@ -109,7 +109,7 @@ export async function readIndexMD() {
 
     return projects;
   } catch (error) {
-    console.error("Error reading index.md:", error);
+    console.error("Error reading README.md:", error);
     return [];
   }
 }

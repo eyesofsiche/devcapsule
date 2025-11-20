@@ -4,8 +4,7 @@ import path from "path";
 import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 import { getUserDataPath } from "../utils/getPath.js";
 import { commitAndPushEnvs } from "./gitRepo.js";
-import { updateIndexMD } from "./updateIndexMD.js";
-import { readIndexMD } from "./updateIndexMD.js";
+import { updateReadmeMD, readReadmeMD } from "./updateReadmeMD.js";
 
 export async function updateProject(
   {
@@ -55,7 +54,7 @@ export async function updateProject(
   await updateSection("projects", project);
 
   if (!sync) return;
-  await updateIndexMD();
+  await updateReadmeMD();
   // Git 백업
   await commitAndPushEnvs("Updated project: " + project.projectName);
 }
@@ -84,25 +83,24 @@ export async function updateProjectFileExists(projectId, exists = false) {
   return null;
 }
 
-export async function syncProjectsWithIndexMD() {
-  const indexData = await readIndexMD();
+export async function syncProjectsWithReadmeMD() {
+  const readmeData = await readReadmeMD();
   const projectsDB = await readSection("projects");
 
-  const indexMap = new Map(indexData.map((item) => [item.id, item]));
-
+  const readmeMap = new Map(readmeData.map((item) => [item.id, item]));
   const updatedProjects = projectsDB.map((project) => {
-    const indexItem = indexMap.get(project.id);
+    const readmeItem = readmeMap.get(project.id);
 
-    if (indexItem) {
+    if (readmeItem) {
       // ID 일치 → projectName, envs 업데이트
       console.log(`🔄 업데이트: ${project.id}`);
-      indexMap.delete(project.id); // 처리된 항목 제거
+      readmeMap.delete(project.id); // 처리된 항목 제거
 
       return {
         ...project,
-        projectName: indexItem.projectName,
-        envs: indexItem.envs,
-        lastSynced: indexItem.lastSynced,
+        projectName: readmeItem.projectName,
+        envs: readmeItem.envs,
+        lastSynced: readmeItem.lastSynced,
       };
     }
 
@@ -110,22 +108,22 @@ export async function syncProjectsWithIndexMD() {
     return project;
   });
 
-  // indexMap에 남은 항목 = projectsDB에 없는 새 프로젝트
-  for (const [id, indexItem] of indexMap.entries()) {
+  // readmeMap에 남은 항목 = projectsDB에 없는 새 프로젝트
+  for (const [id, readmeItem] of readmeMap.entries()) {
     console.log(`➕ 새 프로젝트 추가: ${id}`);
     updatedProjects.push({
-      id: indexItem.id,
-      name: indexItem.projectName,
-      projectName: indexItem.projectName,
+      id: readmeItem.id,
+      name: readmeItem.projectName,
+      projectName: readmeItem.projectName,
       path: "", // 기본값 (나중에 채워야 함)
-      lastSynced: indexItem.lastSynced,
+      lastSynced: readmeItem.lastSynced,
       isFileExists: false, // Git에서 온 것이므로 로컬 파일 없음
       version: null,
       description: null,
       license: null,
       size: null,
       git: null,
-      envs: indexItem.envs,
+      envs: readmeItem.envs,
       envPatterns: null,
     });
   }
@@ -178,7 +176,7 @@ export async function syncProjectsFromFiles() {
 
       const newProject = {
         id: entry.name,
-        name: "unknown", // index.md에서 업데이트 필요
+        name: "unknown", // README.md에서 업데이트 필요
         projectName: "unknown",
         path: "", // 실제 경로는 나중에 사용자가 지정
         lastSynced: new Date().toISOString(), // Pull 시점

@@ -6,7 +6,7 @@ import path from "path";
 import { getUserDataPath } from "../utils/getPath.js";
 
 /**
- * 6번 로직: env 파일 복사 + index.md 업데이트
+ * 6번 로직: env 파일 복사 + README.md 업데이트
  * 실패 시 undoTasks 역순으로 실행해 모두 롤백합니다.
  *
  * @param {String} folderPath    원본 프로젝트 경로

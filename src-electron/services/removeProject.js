@@ -4,7 +4,7 @@ import path from "path";
 import { readSection, removeSection } from "../db/lowdb";
 import { getUserDataPath } from "../utils/getPath.js";
 import { commitAndPushEnvs } from "./gitRepo.js";
-import { updateIndexMD } from "./updateIndexMD.js";
+import { updateReadmeMD } from "./updateReadmeMD.js";
 import { removeProjectWatcher } from "./watchingEnv.js";
 
 /**
@@ -36,7 +36,7 @@ export async function removeProject(id) {
         error: "env 삭제 실패",
       };
     }
-    await updateIndexMD();
+    await updateReadmeMD();
 
     // Git 백업
     await commitAndPushEnvs("Removed project: " + project.projectName);
