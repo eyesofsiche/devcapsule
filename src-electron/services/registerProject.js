@@ -18,24 +18,7 @@ import { addProjectWatcher } from "./watchingEnv.js";
  * @returns
  */
 export async function registerProject(folderPath, projectName = "no title") {
-  const devcapsulePath = path.join(folderPath, ".devcapsule");
-
-  // 기존 파일 로드 or 새로 생성
-  let devcapsule = {};
-  if (existsSync(devcapsulePath)) {
-    try {
-      const raw = await fs.readFile(devcapsulePath, "utf8");
-      devcapsule = JSON.parse(raw);
-    } catch {
-      console.error("⚠️ .devcapsule 파싱 실패");
-      devcapsule = {};
-    }
-  }
-
-  // ID 없는 경우 새로 생성
-  if (!devcapsule.id) {
-    devcapsule.id = crypto.randomUUID();
-  }
+  const devcapsuleId = crypto.randomUUID();
 
   // 분석 및 캐시 갱신
   const analysis = await analyzeProject(folderPath);
@@ -43,21 +26,18 @@ export async function registerProject(folderPath, projectName = "no title") {
     throw new Error("프로젝트 분석 실패");
   }
 
-  // devcapsule 파일 생성
-  writeDevcapsuleFile(folderPath, devcapsule);
-
   // .env 파일 복사 및 md 파일 업데이트, 실패시 local DB 롤백. env 파일이 없으면 무시
   if (analysis.envs.length > 0) {
     try {
-      await copyEnv(folderPath, devcapsule.id, analysis.envs);
+      await copyEnv(folderPath, devcapsuleId, analysis.envs);
     } catch (error) {
-      await removeSection("projects", devcapsule.id);
+      await removeSection("projects", devcapsuleId);
       throw new Error("프로젝트 등록 중 오류 발생: " + error.message);
     }
   }
 
   const project = {
-    id: devcapsule.id,
+    id: devcapsuleId,
     projectName,
     name: projectName,
     path: folderPath,
@@ -80,16 +60,8 @@ export async function registerProject(folderPath, projectName = "no title") {
 
   return {
     success: true,
-    id: devcapsule.id,
+    id: devcapsuleId,
     path: folderPath,
     fromCache: false,
   };
-}
-
-export async function writeDevcapsuleFile(folderPath, devcapsule) {
-  const result = {
-    id: devcapsule.id,
-  };
-  const devcapsulePath = path.join(folderPath, ".devcapsule");
-  await fs.writeFile(devcapsulePath, JSON.stringify(result, null, 2), "utf8");
 }
