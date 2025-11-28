@@ -59,7 +59,54 @@ export default function registerProjectHandlers(mainWindow) {
   ipcMain.on("cmd:info-project", async (event, { replyChannel, path }) => {
     try {
       const result = await analyzeProject(path);
-      event.reply(replyChannel, result);
+
+      // 끊어진 프로젝트 재연결 후보 탐색 로직 추가
+      const projects = await readSection("projects");
+      const disconnected = (projects || []).filter(
+        (p) => p && p.isFileExists === false
+      );
+
+      const normalizeUrl = (u) => {
+        if (!u || typeof u !== "string") return null;
+        let s = u.trim();
+        // ssh 형태 git@github.com:owner/repo(.git)
+        if (s.startsWith("git@")) {
+          const m = s.match(/^git@([^:]+):(.+)$/);
+          if (m) s = `${m[1]}/${m[2]}`;
+        }
+        s = s.replace(/^ssh:\/\//i, "");
+        s = s.replace(/^https?:\/\//i, "");
+        s = s.replace(/\.git$/i, "");
+        return s.toLowerCase();
+      };
+
+      const newRemoteNorms = (result.git?.remotes || [])
+        .map((r) => normalizeUrl(r?.url))
+        .filter(Boolean);
+
+      let matched = null;
+      // 1) Remote URL 매칭 우선
+      if (newRemoteNorms.length > 0) {
+        matched = disconnected.find((p) => {
+          const olds = (p.git?.remotes || [])
+            .map((r) => normalizeUrl(r?.url))
+            .filter(Boolean);
+          return olds.some((u) => newRemoteNorms.includes(u));
+        });
+      }
+
+      // 2) 이름 매칭 보조 (package.json name 혹은 저장된 projectName)
+      if (!matched && result?.name) {
+        matched = disconnected.find(
+          (p) => p?.name === result.name || p?.projectName === result.name
+        );
+      }
+
+      const payload = matched
+        ? { ...result, isBeforeProject: true, matchedProjectId: matched.id }
+        : { ...result, isBeforeProject: false };
+
+      event.reply(replyChannel, payload);
     } catch (err) {
       event.reply(replyChannel, { success: false });
     }

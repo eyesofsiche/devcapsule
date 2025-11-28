@@ -36,10 +36,10 @@ export async function removeProject(id) {
         error: "env 삭제 실패",
       };
     }
-    await updateReadmeMD();
-
-    // Git 백업
-    await commitAndPushEnvs("Removed project: " + project.projectName);
+    // 후처리: README 업데이트, Git 백업 (비동기 처리)
+    postRemoveSideEffects(project.projectName).catch((err) => {
+      console.error("postRemoveSideEffects 실패:", err);
+    });
   }
   return {
     success: del,
@@ -55,5 +55,21 @@ async function deleteProjectEnv(id) {
   } catch (error) {
     console.error("🍂 프로젝트 env 삭제 실패:", error);
     return false;
+  }
+}
+
+async function postRemoveSideEffects(projectName) {
+  try {
+    // README.md 파일 업데이트
+    await updateReadmeMD();
+  } catch (err) {
+    console.error("README 업데이트 실패:", err);
+  }
+
+  try {
+    // Git 백업 (push는 네트워크 상태/락 매니저를 내부에서 처리)
+    await commitAndPushEnvs("Removed project: " + projectName);
+  } catch (err) {
+    console.error("Git 백업 실패:", err);
   }
 }

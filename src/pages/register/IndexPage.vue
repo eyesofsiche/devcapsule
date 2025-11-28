@@ -19,11 +19,39 @@ q-page(:class="!path ? 'flex flex-center' : ''")
             outlined
             readonly
           )
-          project-menu(
-            type="watch"
-            :info="info"
-          )
 
+        .action-btns.row.justify-between
+          .col.q-gutter-sm
+            q-btn(
+              icon="mdi-database-plus-outline"
+              color="warning"
+              round
+              dense
+              @click="clickAddProject"
+            )
+              q-tooltip 프로젝트 등록
+          .col.flex.q-gutter-sm.justify-end
+            q-btn(
+              icon="mdi-apple-finder"
+              color="blue-grey-4"
+              round
+              dense
+              @click="clickOpenFinder"
+            )
+            q-btn(
+              icon="mdi-console-line"
+              color="grey-8"
+              round
+              dense
+              @click="clickOpenTerminal"
+            )
+            q-btn(
+              icon="mdi-microsoft-visual-studio-code"
+              color="primary"
+              round
+              dense
+              @click="clickOpenVSCode"
+            )
         q-list
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
@@ -48,7 +76,6 @@ q-page(:class="!path ? 'flex flex-center' : ''")
 <script>
 import { mapGetters } from "vuex";
 
-import ProjectMenu from "@/components/ContextMenu/ProjectMenu.vue";
 import FlatInput from "@/components/Form/FlatInput.vue";
 import LabelValue from "@/components/Form/LabelValue.vue";
 
@@ -62,7 +89,6 @@ export default {
   components: {
     FlatInput,
     LabelValue,
-    ProjectMenu,
   },
   computed: {
     ...mapGetters(["projects"]),
@@ -105,6 +131,7 @@ export default {
         })
         .then((result) => {
           const { success } = result;
+          console.log(JSON.stringify(result, 0, 2));
           if (success) {
             this.info = result;
             this.info.path = path;
@@ -112,6 +139,72 @@ export default {
               this.info?.name || this.path.split("/").pop();
           }
         });
+    },
+    clickAddProject() {
+      this.$q
+        .dialog({
+          title: "프로젝트 등록",
+          message: "정말로 해당 폴더를 등록하시겠습니까?",
+          persistent: true,
+          cancel: true,
+        })
+        .onOk(async () => {
+          window.electron
+            .invokeWithReply("cmd:create-project", {
+              path: this.info.path,
+              name: this.info.projectName,
+            })
+            .then(async (result) => {
+              const { success, id, error } = result;
+              if (success) {
+                await this.$store.dispatch("watchs/addProject", {
+                  path: this.info.path,
+                });
+                this.$router.push({
+                  name: "project",
+                  query: {
+                    id,
+                  },
+                });
+                this.$q.notify({
+                  type: "positive",
+                  message: "프로젝트 등록에 성공했습니다",
+                });
+              } else {
+                this.$q.notify({
+                  type: "negative",
+                  message: error,
+                });
+              }
+            });
+        });
+    },
+    async clickOpenFinder() {
+      const res = await window.electron.openFolder(this.info.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: "폴더 열기에 실패했습니다",
+        });
+      }
+    },
+    async clickOpenVSCode() {
+      const res = await window.electron.openVSCode(this.info.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: res.error || "VSCode 열기에 실패했습니다",
+        });
+      }
+    },
+    async clickOpenTerminal() {
+      const res = await window.electron.openTerminal(this.info.path);
+      if (!res.success) {
+        this.$q.notify({
+          type: "negative",
+          message: "터미널 열기에 실패했습니다",
+        });
+      }
     },
   },
 };

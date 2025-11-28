@@ -52,11 +52,10 @@ export async function registerProject(folderPath, projectName = "no title") {
   // watcher 등록
   addProjectWatcher(project);
 
-  // README.md 파일 업데이트
-  await updateReadmeMD();
-
-  // Git 백업
-  await commitAndPushEnvs("Registered project: " + projectName);
+  // 후처리: README 업데이트, Git 백업 (비동기 처리)
+  postRegisterSideEffects(projectName).catch((err) => {
+    console.error("postRegisterSideEffects 실패:", err);
+  });
 
   return {
     success: true,
@@ -64,4 +63,20 @@ export async function registerProject(folderPath, projectName = "no title") {
     path: folderPath,
     fromCache: false,
   };
+}
+
+async function postRegisterSideEffects(projectName) {
+  try {
+    // README.md 파일 업데이트
+    await updateReadmeMD();
+  } catch (err) {
+    console.error("README 업데이트 실패:", err);
+  }
+
+  try {
+    // Git 백업 (push는 네트워크 상태/락 매니저를 내부에서 처리)
+    await commitAndPushEnvs("Registered project: " + projectName);
+  } catch (err) {
+    console.error("Git 백업 실패:", err);
+  }
 }
