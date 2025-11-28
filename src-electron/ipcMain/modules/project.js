@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+import { existsSync } from "fs";
 
 import { readSection } from "../../db/lowdb/index.js";
 import { analyzeProject } from "../../helpers/analyzeProject.js";
@@ -7,6 +8,7 @@ import { removeProject } from "../../services/removeProject.js";
 import { restoreProject } from "../../services/restoreProject.js";
 import { scanner } from "../../services/scanProject.js";
 import { updateProject } from "../../services/updateProject.js";
+import { updateProjectFileExists } from "../../services/updateProject.js";
 
 export default function registerProjectHandlers(mainWindow) {
   // 자동 새로고침 설정 변경
@@ -45,6 +47,17 @@ export default function registerProjectHandlers(mainWindow) {
 
     // 파일이 존재하는 경우에만 분석
     if (project.isFileExists) {
+      // 1) 경로 존재 여부 우선 확인 (DevCapsule 미실행 중 삭제/이동 대응)
+      if (!existsSync(project.path)) {
+        await updateProjectFileExists(project.id);
+        const updated = { ...project, isFileExists: false };
+        event.sender.send("event:info-project-updated", {
+          type: "updated",
+          data: updated,
+        });
+        return;
+      }
+
       const updated = await analyzeProject(project.path);
       updateProject({ ...updated, id }, false);
 
