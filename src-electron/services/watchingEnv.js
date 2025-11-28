@@ -42,18 +42,39 @@ export function addProjectWatcher(project) {
 
     watcher.on("change", async () => {
       try {
-        const backupPath = path.join(
-          getUserDataPath(), // 너가 정의한 함수
-          "envs",
-          project.id,
-          envName
+        const backupDir = path.join(
+          getUserDataPath(),
+          `envs/files/${project.id}`
         );
+        const backupPath = path.join(backupDir, envName);
         await fs.mkdir(path.dirname(backupPath), { recursive: true });
         await fs.copyFile(fullPath, backupPath);
         console.log(`[WATCH] ${envName} 변경됨 → 백업 완료`);
       } catch (err) {
         console.error(`[WATCH] ${envName} 복사 실패`, err);
       }
+    });
+
+    // 파일/폴더 삭제 감지
+    watcher.on("unlink", () => {
+      console.log(`⚠️ [WATCH] ${envName} 삭제 감지 - watcher 정리`);
+      watcher.close();
+      watchers.delete(fullPath);
+
+      // DB 업데이트: isFileExists = false
+      updateProject({
+        id: project.id,
+        isFileExists: false,
+      }).catch((err) => {
+        console.error(`[WATCH] DB 업데이트 실패:`, err);
+      });
+    });
+
+    // 에러 처리 (경로 접근 불가 등)
+    watcher.on("error", (error) => {
+      console.error(`❌ [WATCH] ${fullPath} 에러 발생:`, error.message);
+      watcher.close();
+      watchers.delete(fullPath);
     });
 
     watchers.set(fullPath, watcher);
