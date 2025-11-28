@@ -37,28 +37,8 @@ q-page(:class="!project ? 'flex flex-center' : ''")
               dense
               @click="visibleRestore = true"
             )
-          .col.flex.q-gutter-sm.justify-end(v-if="project?.isFileExists")
-            q-btn(
-              icon="mdi-apple-finder"
-              color="blue-grey-4"
-              round
-              dense
-              @click="clickOpenFinder"
-            )
-            q-btn(
-              icon="mdi-console-line"
-              color="grey-8"
-              round
-              dense
-              @click="clickOpenTerminal"
-            )
-            q-btn(
-              icon="mdi-microsoft-visual-studio-code"
-              color="primary"
-              round
-              dense
-              @click="clickOpenVSCode"
-            )
+
+          action-btn.flex.q-gutter-sm.justify-end(v-if="project?.isFileExists" :info="info" type="connect")
         q-list
           q-item-label(header :style="`width: ${labelWidth};`")
             q-icon.q-mr-sm(name="mdi-pin" size="20px" color="white")
@@ -85,6 +65,7 @@ q-page(:class="!project ? 'flex flex-center' : ''")
 <script>
 import { mapGetters } from "vuex";
 
+import ActionBtn from "@/components/ContextMenu/ActionBtn.vue";
 import ProjectMenu from "@/components/ContextMenu/ProjectMenu.vue";
 import FlatInput from "@/components/Form/FlatInput.vue";
 import LabelValue from "@/components/Form/LabelValue.vue";
@@ -97,6 +78,7 @@ export default {
     LabelValue,
     ProjectMenu,
     PopupRestore,
+    ActionBtn,
   },
   computed: {
     ...mapGetters(["projects"]),
@@ -191,33 +173,6 @@ export default {
             this.projectName = this.project.projectName;
           }
         });
-    },
-    async clickOpenFinder() {
-      const res = await window.electron.openFolder(this.project.path);
-      if (!res.success) {
-        this.$q.notify({
-          type: "negative",
-          message: "폴더 열기에 실패했습니다",
-        });
-      }
-    },
-    async clickOpenVSCode() {
-      const res = await window.electron.openVSCode(this.project.path);
-      if (!res.success) {
-        this.$q.notify({
-          type: "negative",
-          message: res.error || "VSCode 열기에 실패했습니다",
-        });
-      }
-    },
-    async clickOpenTerminal() {
-      const res = await window.electron.openTerminal(this.project.path);
-      if (!res.success) {
-        this.$q.notify({
-          type: "negative",
-          message: "터미널 열기에 실패했습니다",
-        });
-      }
     },
   },
 };
