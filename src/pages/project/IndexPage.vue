@@ -55,9 +55,9 @@ q-page(:class="!project ? 'flex flex-center' : ''")
             q-item-label(header :style="`width: ${labelWidth};`")
               q-icon.q-mr-sm(name="mdi-git" size="20px" color="white")
               | Git 정보
-            label-value(label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
+            label-value(v-if="info?.git?.currentBranch" label="브랜치" :value="info?.git?.currentBranch" :width="labelWidth")
             label-value(v-if="info?.git?.remotes.length > 0" label="remote" :value="remotes" :width="labelWidth")
-            label-value(label="마지막 커밋" :value="info?.git?.lastCommit?.message" :width="labelWidth")
+            label-value(v-if="info?.git?.lastCommit?.message" label="마지막 커밋" :value="info?.git?.lastCommit?.message" :width="labelWidth")
 
   popup-restore(v-model="visibleRestore" :project="info" @hide="visibleRestore = false" @restored="fetchProject")
 </template>
