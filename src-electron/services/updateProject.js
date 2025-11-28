@@ -5,6 +5,7 @@ import { readSection, updateSection, writeSection } from "../db/lowdb/index.js";
 import { getUserDataPath } from "../utils/getPath.js";
 import { commitAndPushEnvs } from "./gitRepo.js";
 import { updateReadmeMD, readReadmeMD } from "./updateReadmeMD.js";
+import { addProjectWatcher, removeProjectWatcher } from "./watchingEnv.js";
 
 export async function updateProject(
   {
@@ -71,16 +72,29 @@ export async function excludeFolderList(folderPath) {
   await writeSection("watchs", watchsDB);
 }
 
-export async function updateProjectFileExists(projectId, exists = false) {
+export async function updateProjectFileExists(
+  projectId,
+  exists = false,
+  clonePath = null
+) {
   const projectsDB = await readSection("projects");
   const project = projectsDB.find((p) => p.id === projectId);
   if (project) {
     project.isFileExists = exists;
+    if (clonePath) {
+      project.path = clonePath;
+    }
+    if (exists) {
+      // watcher 추가
+      addProjectWatcher(project);
+    } else {
+      // watcher 제거
+      removeProjectWatcher(project.path, project.envs);
+    }
+    await updateSection("projects", {
+      ...project,
+    });
   }
-  await updateSection("projects", {
-    ...project,
-  });
-  return null;
 }
 
 export async function syncProjectsWithReadmeMD() {
