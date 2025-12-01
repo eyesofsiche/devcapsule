@@ -1,6 +1,6 @@
 {
   "name": "dev-capsule",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "One-click restore for your development projects with env, git, and install management.",
   "productName": "DevCapsule",
   "author": "siche <siche@eos.pe.kr>",
