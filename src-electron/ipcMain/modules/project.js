@@ -3,6 +3,7 @@ import { existsSync } from "fs";
 
 import { readSection } from "../../db/lowdb/index.js";
 import { analyzeProject } from "../../helpers/analyzeProject.js";
+import { connectProject } from "../../services/connectProject.js";
 import { registerProject } from "../../services/registerProject.js";
 import { removeProject } from "../../services/removeProject.js";
 import { restoreProject } from "../../services/restoreProject.js";
@@ -130,6 +131,18 @@ export default function registerProjectHandlers(mainWindow) {
     async (event, { replyChannel, path, name }) => {
       try {
         const result = await registerProject(path, name);
+        event.reply(replyChannel, result);
+      } catch (err) {
+        event.reply(replyChannel, { success: false, error: err.message });
+      }
+    }
+  );
+
+  ipcMain.on(
+    "cmd:connect-project",
+    async (event, { replyChannel, projectId, path }) => {
+      try {
+        const result = await connectProject(projectId, path);
         event.reply(replyChannel, result);
       } catch (err) {
         event.reply(replyChannel, { success: false, error: err.message });
